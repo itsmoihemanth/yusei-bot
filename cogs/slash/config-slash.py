@@ -40,11 +40,11 @@ class Config(commands.Cog, name="config-slash"):
             json.dump(guild, p,indent=6)
 
         embed = discord.Embed(title="Server Configuration", color=guild[str(interaction.guild.id)]["color"])
-        embed.set_author(name="", icon_url=https://cdn.discordapp.com/avatars/974218172054007809/935d0b2037631baaa14b434f65f4cde2.webp)
-        embed.add_field(name="__**Sfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]["sfw"]}>", inline=True)
-        embed.add_field(name="__**Nsfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]["nsfw"]}>", inline=True)
-        embed.add_field(name="__**Birthday Channel**__", value=f"<#{guild[str(interaction.guild.id)]["birthday"]}>", inline=True)
-        embed.add_field(name="__**Embed Color**__", value=f"<#{guild[str(interaction.guild.id)]["color"]}>", inline=True)
+        embed.set_author(name="yusei", icon_url="https://cdn.discordapp.com/avatars/974218172054007809/935d0b2037631baaa14b434f65f4cde2.webp")
+        embed.add_field(name="__**Sfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['sfw']}>", inline=True)
+        embed.add_field(name="__**Nsfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['nsfw']}>", inline=True)
+        embed.add_field(name="__**Birthday Channel**__", value=f"<#{guild[str(interaction.guild.id)]['birthday']}>", inline=True)
+        embed.add_field(name="__**Embed Color**__", value=f"<#{guild[str(interaction.guild.id)]['color']}>", inline=True)
         await interaction.respond(embed=embed)
 
     @config.command(

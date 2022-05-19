@@ -30,7 +30,9 @@ class Quotes(commands.Cog, name="quotes-slash"):
           # await interaction.respond(embed = embed)
 
         # else:
-
+        with open("guild.json") as file:
+            guild = json.load(file)
+            
         if interaction.channel.is_nsfw():
             nsfw = 1
         else:
@@ -55,7 +57,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
             data = db_api.insert(data)
             response = "**"+quote+"**"
                 
-        embed = discord.Embed(description=response, color=14942490)
+        embed = discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"])
         
         if quote_exists==False:
             embed.set_footer(text=f"Id:{data['id']}")
@@ -114,7 +116,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
                     Author = quote_dict["name"]                                                      ## Dataframe Author value to string
                     response = response +"**__Quote "+ str(row)+"__**\n*"+Quote +"\n~ "+Author+"*\n\n"           ## Output formatting 
 
-                paginationList.append(discord.Embed(title=title, description = response, color=14942490))
+                paginationList.append(discord.Embed(title=title, description = response, color=guild[str(interaction.guild.id)]["color"]))
                 if k>n:
                     break
                 k+=5

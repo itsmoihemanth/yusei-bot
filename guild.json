@@ -2,16 +2,25 @@
       "697934302088003665": {
             "name": "skittles server",
             "sfw": 969122578000142336,
-            "nsfw": null
+            "nsfw": null,
+            "color":14942490
       },
       "959379487718510592": {
             "name": "Yoru shinaini | Chill Hangout | Games | Anime | Socialize | Memes | Music",
             "sfw": 973934643038531667,
-            "nsfw": null
+            "nsfw": null,
+            "color":14942490
       },
       "736101194300129390": {
             "name": "reapur \u2122's Testbed",
             "sfw": 932838203826782239,
-            "nsfw": 799520552784101406
-      }
+            "nsfw": 799520552784101406,
+            "color":14942490
+      },
+     "952097014341062716":{
+         	"name": "Khaos Server",
+            "sfw": 957785730887843841,
+            "nsfw": null,
+            "color":14942490
+	}
 }

@@ -48,27 +48,57 @@ if __name__ == "__main__":
     #load_commands("listeners")
 
 @bot.event
-async def on_application_command_error(ctx, error):
+async def on_application_command_error(context, error):
 
     if isinstance(error, commands.CommandOnCooldown):
-        await ctx.respond(f"This command is on cooldown... try again in {error.retry_after:.2f} seconds.")
+        await context.respond(f"This command is on cooldown... try again in {error.retry_after:.2f} seconds.")
+    elif isinstance(error, commands.errors.MissingPermissions):
+        await context.send("You do not have permission to use this command")
     elif isinstance(error, commands.CheckFailure):
-        pass
+        await context.send(error)
     else:
         print(error, type(error))
-        await ctx.respond("Whoops! Looks liks something's amiss")
+        await context.respond("Whoops! Looks liks something's amiss")
 
 @bot.event
-async def on_command_error(ctx, error):
-    if isinstance(error, commands.errors.MissingRequiredArgument):
+async def on_command_error(context, error):
+    if isinstance(error, commands.CommandOnCooldown):
+        await context.respond(f"This command is on cooldown... try again in {error.retry_after:.2f} seconds.")
+    elif isinstance(error, commands.errors.MissingRequiredArgument):
         print(error, type(error))
-        await ctx.send(error)
+        await context.send(error)
     elif isinstance(error, commands.CommandNotFound):
         print(error, type(error))
-        await ctx.send("That's not a command. Take a look at commands https://github.com/tcolas673/birthdaybot")
+        await context.send("That is not a valid command")
+    elif isinstance(error, commands.errors.MissingPermissions):
+        await context.send("You do not have permission to use this command")
     else:
         print(error, type(error))
-        await ctx.send("Whoops! Looks liks something's amiss")
+        await context.send(f"Whoops! Looks liks something's amiss: {error}")
+
+@bot.event
+async def on_guild_join(guild):
+    
+	print(f"Bot joined {guild.name}")
+    with open("guild.json") as file:
+            guild_dict = json.load(file)
+
+    guild_dict[str(guild.id)]={"name":f"{guild.name}", "sfw":None, "nsfw":None, "birthday":None,"color":14942490}
+    
+    with open("guild.json", "w") as p:
+            json.dump(guild_dict, p,indent=6)
+
+@bot.event
+async def on_guild_remove(guild):
+
+    with open("guild.json") as file:
+            guild_dict = json.load(file)
+
+    removed_value = guild_dict.pop(str(guild.id), 'Guild not found')
+    print(f"Bot has been removed from {guild.name}")
+    
+    with open("guild.json", "w") as p:
+            json.dump(guild_dict, p,indent=6)
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -94,7 +124,7 @@ async def on_raw_reaction_add(payload):
                 nsfw = 0
 
             embed = discord.Embed(description=f"{message.content}\n\n[Jump to message]({message.jump_url})",
-                                    colour=14942490)
+                                    colour=guild[str(payload.guild_id)]["color"])
                                 
             data = {
                     "table": "quotes",

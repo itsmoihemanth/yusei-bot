@@ -79,9 +79,10 @@ async def on_command_error(context, error):
 @bot.event
 async def on_guild_join(guild):
     
-	print(f"Bot joined {guild.name}")
+    print(f"Bot joined {guild.name}")
+
     with open("guild.json") as file:
-            guild_dict = json.load(file)
+        guild_dict = json.load(file)
 
     guild_dict[str(guild.id)]={"name":f"{guild.name}", "sfw":None, "nsfw":None, "birthday":None,"color":14942490}
     
@@ -110,17 +111,16 @@ async def on_raw_reaction_add(payload):
                 guild = json.load(file)
 
             if message.channel.is_nsfw():
-                if str(payload.guild_id) in guild:
-                    if guild[str(interaction.guild.id)]["nsfw"]:
-                        channel = bot.get_channel(guild[str(payload.guild_id)]["nsfw"])
-                    else:
-                        channel = bot.get_channel(guild[str(payload.guild_id)]["sfw"])
+                if guild[str(payload.guild_id)]["nsfw"]:
+                    channel = bot.get_channel(guild[str(payload.guild_id)]["nsfw"])
+                else:
+                    await message.reply("Please set the channel to use for nsfw quotes using /config")
                 nsfw = 1
             else:
-                if str(payload.guild_id) in guild:
+                if guild[str(payload.guild_id)]["sfw"]:
                     channel = bot.get_channel(guild[str(payload.guild_id)]["sfw"])
                 else:
-                    await message.reply("Please set the channel to use for sfw quotes using /set")
+                    await message.reply("Please set the channel to use for sfw quotes using /config")
                 nsfw = 0
 
             embed = discord.Embed(description=f"{message.content}\n\n[Jump to message]({message.jump_url})",

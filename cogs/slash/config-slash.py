@@ -24,12 +24,6 @@ class Config(commands.Cog, name="config-slash"):
                             nsfw_channel: Option(discord.TextChannel, "Set the nsfw quotes channel", default=None),
                             birthday_channel: Option(discord.TextChannel, "Set the birthday channel", default=None)):
 
-<<<<<<< HEAD
-=======
-        
-        response = ""
-
->>>>>>> 80604a1cb2fac7f9792431f109594e15caf9d969
         with open("guild.json") as file:
             guild = json.load(file)
 
@@ -45,17 +39,12 @@ class Config(commands.Cog, name="config-slash"):
         with open("guild.json", "w") as p:
             json.dump(guild, p,indent=6)
 
-<<<<<<< HEAD
         embed = discord.Embed(title="Server Configuration", color=guild[str(interaction.guild.id)]["color"])
         embed.set_author(name="", icon_url=https://cdn.discordapp.com/avatars/974218172054007809/935d0b2037631baaa14b434f65f4cde2.webp)
         embed.add_field(name="__**Sfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]["sfw"]}>", inline=True)
         embed.add_field(name="__**Nsfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]["nsfw"]}>", inline=True)
         embed.add_field(name="__**Birthday Channel**__", value=f"<#{guild[str(interaction.guild.id)]["birthday"]}>", inline=True)
         embed.add_field(name="__**Embed Color**__", value=f"<#{guild[str(interaction.guild.id)]["color"]}>", inline=True)
-=======
-        embed = discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"])
-
->>>>>>> 80604a1cb2fac7f9792431f109594e15caf9d969
         await interaction.respond(embed=embed)
 
     @config.command(

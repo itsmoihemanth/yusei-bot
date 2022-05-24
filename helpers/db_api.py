@@ -32,7 +32,13 @@ def insert(data):
             cur.execute(f"INSERT INTO `quotes` (`id`, `user_id`, `name`, `quote`, `nsfw`, `guild_id`) VALUES ('{data['id']}', '{data['user_id']}', '{data['name']}', '{data['quote']}', '{data['nsfw']}', '{data['guild_id']}');")
 
         elif data['table'] == "birthday":
-            cur.execute(f"INSERT INTO `birthday` (user_id,name,day,month,year) VALUES ('{data['user_id']}', '{data['name']}', '{data['day']}','{data['month']}','{data['year']}');")
+            year = ""
+            yr = ""
+            if not math.isnan(data['Year']):
+                year = f",'{data['Year']}'"
+                yr = ",year"
+            cur.execute(f"INSERT INTO `birthday` (user_id,name,day,month{yr}) VALUES ('{data['Id']}', '{data['Name']}', '{data['Day']}','{data['Month']}'{year});")
+
 
         conn.commit()
         inserted_user = data
@@ -129,12 +135,16 @@ def get_quote_by_id(id):
 def get_birthdays(data):
     birthdays = []
     search=""
-    if data['user_id']:
+    limit=""
+    if 'user_id' in data and data['user_id']:
         search = f"WHERE `user_id` = '{data['user_id']}'"
+    if 'date' in data and data['date']:
+        search = f"WHERE `month`>'{data['date']}'"
+        limit = f"LIMIT {data['limit']}"
     try:
         conn = connect_to_db()
         cur = conn.cursor(dictionary=True)
-        cur.execute(f"SELECT * FROM `birthday` {search} ORDER BY `day`,`month`;")
+        cur.execute(f"SELECT * FROM `birthday` {search} ORDER BY `month`,`day` {limit};")
         rows = cur.fetchall()
         if not rows:
             return f"User <@!{data['user_id']}> did not set their birthday" if data['user_id'] else "No birthdays have been set"
@@ -159,7 +169,7 @@ def remove(data):
     try:
         conn = connect_to_db()
         cur = conn.cursor()
-        cur.execute(f"DELETE FROM `birthday` WHERE 'user_id' = '{data['user_id']}'")
+        cur.execute(f"DELETE FROM `birthday` WHERE `user_id` = '{data['user_id']}'")
         conn.commit()
         return True
         

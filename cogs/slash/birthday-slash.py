@@ -14,8 +14,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
 
     @bday.command(
         name="set",
-        description="Add your birthday",
-        guilds=[736101194300129390]
+        description="Add your birthday"
         )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
@@ -96,8 +95,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
 
     @bday.command(
         name="view",
-        description="View birthdays",
-        guilds=[736101194300129390]
+        description="View birthdays"
         )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
@@ -109,14 +107,25 @@ class Birthday(commands.Cog, name="birthday-slash"):
         data = {'user_id':member.id if member else None}
         birthdays = db_api.get_birthdays(data)
         
+        with open("guild.json") as file:
+            guild = json.load(file)
+
         if member:
             birthday_dict = birthdays[0]
             name = birthday_dict["name"]
             day = birthday_dict["day"]
             month = birthday_dict["month"]
             dat = datetime.datetime(today.year, month, day)
-            dat = dat.strftime("%d %B")
-            make_embed = discord.Embed(description=f"{name}'s birthday is on {dat}",
+            dat = dat.strftime("%B")
+            if day in [1, 21, 31, 41, 51, 61, 71]:
+                suffix = "st"
+            elif day in [2, 22, 32, 42, 52, 62, 72]:
+                suffix = "nd"
+            elif day in [3, 23, 33, 43, 53, 63, 73]:
+                suffix = "rd"
+            else:
+                suffix = "th"
+            make_embed = discord.Embed(description=f"{name}'s birthday is on {day}{suffix} {dat}",
                                         color=guild[str(interaction.guild.id)]["color"])
               
             if interaction.guild.icon != None:
@@ -124,9 +133,6 @@ class Birthday(commands.Cog, name="birthday-slash"):
             await interaction.respond(embed=make_embed)
 
         else:
-            with open("guild.json") as file:
-                guild = json.load(file)
-
             n = len(birthdays)
             paginationList = []
 
@@ -187,9 +193,52 @@ class Birthday(commands.Cog, name="birthday-slash"):
             await paginator.respond(interaction.interaction)
 
     @bday.command(
+    name="upcoming",
+    description="upcoming birthdays"
+    )
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @checks.not_blacklisted()
+    async def bday_upcoming(self, interaction: discord.ApplicationContext,
+                        number: Option(int, "How many upcoming birthdays do you want to see?",min_value=1,max_value=10,default=1)):
+
+        today = datetime.datetime.now()
+        data = {'date':today.month,'limit':number}
+        birthdays = db_api.get_birthdays(data)
+
+        response = "*To set your birthday use `/bday set`*\n\n"
+                
+        for num in range(0, len(birthdays)):
+                
+            birthday_dict = birthdays[num]
+            name = birthday_dict["name"]
+            day = birthday_dict["day"]
+            month = birthday_dict["month"]
+            dat = datetime.datetime(today.year, month, day)
+            dat = dat.strftime("%B")
+            if day in [1, 21, 31, 41, 51, 61, 71]:
+                suffix = "st"
+            elif day in [2, 22, 32, 42, 52, 62, 72]:
+                suffix = "nd"
+            elif day in [3, 23, 33, 43, 53, 63, 73]:
+                suffix = "rd"
+            else:
+                suffix = "th"
+            response = response + f"__{day}{suffix} {dat}__: **{name}**\n" 
+        
+        with open("guild.json") as file:
+            guild = json.load(file)
+        make_embed = discord.Embed(title="__Birthdays__",
+                                description=response,
+                                color=guild[str(interaction.guild.id)]["color"])
+              
+        if interaction.guild.icon != None:
+            make_embed.set_thumbnail(url=interaction.guild.icon.url)
+        
+        await interaction.respond(embed=make_embed)
+    
+    @bday.command(
     name="remove",
-    description="remove birthday",
-    guilds=[736101194300129390]
+    description="remove birthday"
     )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()

@@ -23,7 +23,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
         author: Option(discord.Member, "Person who said the quote.")):
         
         # file = manager.check_channel(interaction,guild_info)
-
+         
         # if file == "Wrong_channel":
           # response = "**you sussy baka! you can't use this command here:raised_hand:**\ngo to the quotes channel to use it :rolling_eyes:"
           # embed = discord.Embed(description=response, color=0xe0a8cf)
@@ -37,6 +37,8 @@ class Quotes(commands.Cog, name="quotes-slash"):
             nsfw = 1
         else:
             nsfw = 0
+        
+        quote = quote.strip()      
 
         data = {
             "table": "quotes",
@@ -47,11 +49,11 @@ class Quotes(commands.Cog, name="quotes-slash"):
             "guild_id": interaction.guild.id
             }
         
-        quote_exists = db_api.check_exists(data)
-        quote = quote.strip()                                                                   
+        quote_exists = db_api.check_exists(data)                                                             
         
         if quote_exists==True:
             response = "BAKA!! That quote by "+str(author.name)+ " is already there."
+
             
         else:
             data = db_api.insert(data)
@@ -62,8 +64,8 @@ class Quotes(commands.Cog, name="quotes-slash"):
         if quote_exists==False:
             embed.set_footer(text=f"Id:{data['id']}")
             embed.set_author(name=author.name)
-            if author.avatar != None:
-                embed.set_thumbnail(url=author.avatar.url)
+            if author.display_avatar != None:
+                embed.set_thumbnail(url=author.display_avatar.url)
             
         await interaction.respond(embed = embed)
          
@@ -112,9 +114,9 @@ class Quotes(commands.Cog, name="quotes-slash"):
                         break
                     row=num+1
                     quote_dict = quotes[num]
-                    Quote = quote_dict["quote"]                                                      ## Dataframe Quote value to string
-                    Author = quote_dict["name"]                                                      ## Dataframe Author value to string
-                    response = response +"**__Quote "+ str(row)+"__**\n*"+Quote +"\n~ "+Author+"*\n\n"           ## Output formatting 
+                    Quote = quote_dict["quote"]                                                     
+                    Author = quote_dict["name"]                                                     
+                    response = response +"**__Quote "+ str(row)+"__**\n*"+Quote +"\n~ "+Author+"*\n\n"           
 
                 paginationList.append(discord.Embed(title=title, description = response, color=guild[str(interaction.guild.id)]["color"]))
                 if k>n:

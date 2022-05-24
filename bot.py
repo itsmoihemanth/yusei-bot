@@ -48,17 +48,17 @@ if __name__ == "__main__":
     #load_commands("listeners")
 
 @bot.event
-async def on_application_command_error(context, error):
+async def on_application_command_error(Interaction, error):
 
     if isinstance(error, commands.CommandOnCooldown):
-        await context.respond(f"This command is on cooldown... try again in {error.retry_after:.2f} seconds.")
+        await Interaction.respond(f"This command is on cooldown... try again in {error.retry_after:.2f} seconds.",ephemeral=True)
     elif isinstance(error, commands.errors.MissingPermissions):
-        await context.send("You do not have permission to use this command")
+        await Interaction.respond(error,ephemeral=True)
     elif isinstance(error, commands.CheckFailure):
-        await context.send(error)
+        await Interaction.respond(error,ephemeral=True)
     else:
         print(error, type(error))
-        await context.respond("Whoops! Looks liks something's amiss")
+        await Interaction.respond("Whoops! Looks liks something's amiss",ephemeral=True)
 
 @bot.event
 async def on_command_error(context, error):
@@ -137,8 +137,6 @@ async def on_raw_reaction_add(payload):
             if message.attachments != []:
                 image = message.attachments[0]
                 embed.set_image(url=image.url,)
-                quote = message.content + f" \n[view image]({image.url})"
-                data["quote"]=quote
                 
             if message.content != "":
                 
@@ -150,13 +148,13 @@ async def on_raw_reaction_add(payload):
                 else:
                     data = db_api.insert(data) 
             
-            embed.set_footer(text=f"#{message.channel} | {data['id']}") 
+            embed.set_footer(text=f"#{message.channel} | {data['id']}" if message.content!="" else f"#{message.channel}") 
             if message.guild.icon != None:
                 embed.set_author(name=message.author, icon_url=message.guild.icon.url)
             else:
                 embed.set_author(name=message.author)
-                
-            embed.set_thumbnail(url=message.author.display_avatar.url)
+            if message.author.display_avatar:   
+                embed.set_thumbnail(url=message.author.display_avatar.url)
             
             c_id = channel.id if channel else payload.channel_id
             if payload.channel_id != c_id:
@@ -166,7 +164,7 @@ async def on_raw_reaction_add(payload):
             
             
         else:
-            await message.reply(f"Ummm hmmm Ummm hmmm, yep just as i thought \n\n Yeeeeeaaaahhhhh {message.author.name} i can't add that as a quote.")
+            await message.reply(f"I can not add that as a quote yet.")
 
 """class PersistentView(discord.ui.View):
     def __init__(self):

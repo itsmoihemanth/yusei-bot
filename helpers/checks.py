@@ -23,9 +23,9 @@ def not_blacklisted() -> Callable[[T], T]:
     async def predicate(context: commands.Context) -> bool:
         with open("blacklist.json") as file:
             data = json.load(file)
-        if context.author.id in data["user_ids"]:
+        if context.author.id in data[f"{context.guild.id}"]["user_ids"]:
             raise UserBlacklisted
-        if context.channel.id in data["channel_ids"]:
+        if context.channel.id in data[f"{context.guild.id}"]["channel_ids"]:
             raise ChannelBlacklisted
         return True
 

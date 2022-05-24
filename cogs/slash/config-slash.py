@@ -44,7 +44,7 @@ class Config(commands.Cog, name="config-slash"):
         embed.add_field(name="__**Nsfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['nsfw']}>" if guild[str(interaction.guild.id)]['nsfw'] else "Not set")
         embed.add_field(name="__**Birthday Channel**__", value=f"<#{guild[str(interaction.guild.id)]['birthday']}>" if guild[str(interaction.guild.id)]['birthday'] else "Not set")
         embed.add_field(name="__**Embed Color**__", value=f"#{hex(guild[str(interaction.guild.id)]['color']).lstrip('0x')}", inline=True)
-        await interaction.respond(embed=embed)
+        await interaction.respond(embed=embed,ephemeral=True)
 
     @config.command(
         name="color",
@@ -54,9 +54,8 @@ class Config(commands.Cog, name="config-slash"):
     @checks.not_blacklisted()
     @commands.has_permissions(administrator=True)
     async def config_color(self, interaction: discord.ApplicationContext, 
-                            color_hex: Option(str, "The Hex color for embeds to use", required = False)):
-        
-        
+                            color_hex: Option(str, "The Hex color for embeds to use", required = True)):
+         
         color = color_hex.strip()
         color = color.lstrip('#')
         color = int(color,16)

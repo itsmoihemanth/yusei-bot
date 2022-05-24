@@ -29,10 +29,10 @@ def insert(data):
        
         if data['table'] == "quotes":
             data['id'] = uuid.uuid4().hex[:8]
-            cur.execute(f"INSERT INTO `quotes` (`id`, `user_id`, `name`, `quote`, `nsfw`, `guild_id`) VALUES ('{data['id']}', '{data['user_id']}', '{data['name']}', '{data['quote']}', '{data['nsfw']}', '{data['guild_id']}')");
+            cur.execute(f"INSERT INTO `quotes` (`id`, `user_id`, `name`, `quote`, `nsfw`, `guild_id`) VALUES ('{data['id']}', '{data['user_id']}', '{data['name']}', '{data['quote']}', '{data['nsfw']}', '{data['guild_id']}');")
 
-        elif data['table'] == "birthdays":
-            cur.execute("INSERT INTO `birthday` (user_id,name,birthday,timezone) VALUES (?, ?, ?, ?, ?, ?)", (data['user_id'], data['name'], data['birthday'], data['timezone']));
+        elif data['table'] == "birthday":
+            cur.execute(f"INSERT INTO `birthday` (user_id,name,day,month,year) VALUES ('{data['user_id']}', '{data['name']}', '{data['day']}','{data['month']}','{data['year']}');")
 
         conn.commit()
         inserted_user = data
@@ -51,7 +51,7 @@ def check_exists(data):
         cur = conn.cursor()
       
         if data['table'] == "quotes":
-            cur.execute(f"SELECT * FROM `quotes` WHERE user_id = '{data['user_id']}' and quote = '{data['quote']}'")
+            cur.execute(f"SELECT * FROM `quotes` WHERE `guild_id` = '{data['guild_id']}' and user_id = '{data['user_id']}' and quote = '{data['quote']}'")
 
         elif data['table'] == "birthday":
             cur.execute(f"SELECT * FROM `birthday` WHERE user_id = '{data['user_id']}'")
@@ -134,21 +134,34 @@ def get_birthdays(data):
     try:
         conn = connect_to_db()
         cur = conn.cursor(dictionary=True)
-        cur.execute(f"SELECT * FROM `birthday` {search} ORDER BY `birthday`;")
+        cur.execute(f"SELECT * FROM `birthday` {search} ORDER BY `day`,`month`;")
         rows = cur.fetchall()
         if not rows:
-            return f"User <@!{data['user_id']}> was never quoted" if data['user_id'] else "This server has no quotes"
+            return f"User <@!{data['user_id']}> did not set their birthday" if data['user_id'] else "No birthdays have been set"
             
         for row in rows:
             birthday = {}
             birthday["user_id"] = row["user_id"]
             birthday["name"] = row["name"]
-            birthday["birthday"] = row["birthday"]
-            birthday["guild_id"] = row["guild_id"]
-            birthdays.append(quote)
+            birthday["day"] = row["day"]
+            birthday["month"] = row["month"]
+            birthday["year"] = row["year"]
+            birthdays.append(birthday)
 
     except Exception as e:
         print(f"Error retriving birthdays: {e}")
         return f"Error: {e}"
 
     return birthdays
+
+
+def remove(data):
+    try:
+        conn = connect_to_db()
+        cur = conn.cursor(dictionary=True)
+        cur.execute(f"DELETE FROM `birthday` WHERE user_id = '{data['user_id']}'")
+        return True
+        
+    except Exception as e:
+        print(f"Error dropping row: {e}")
+        return False

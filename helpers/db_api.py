@@ -158,8 +158,9 @@ def get_birthdays(data):
 def remove(data):
     try:
         conn = connect_to_db()
-        cur = conn.cursor(dictionary=True)
-        cur.execute(f"DELETE FROM `birthday` WHERE user_id = '{data['user_id']}'")
+        cur = conn.cursor()
+        cur.execute(f"DELETE FROM `birthday` WHERE 'user_id' = '{data['user_id']}'")
+        conn.commit()
         return True
         
     except Exception as e:

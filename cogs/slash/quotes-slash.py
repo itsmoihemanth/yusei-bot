@@ -5,7 +5,6 @@ from discord.ext import commands
 from discord.commands import Option, SlashCommandGroup
 from helpers import checks, db_api
 
-
 class Quotes(commands.Cog, name="quotes-slash"):
     def __init__(self, bot):
         self.bot = bot
@@ -21,15 +20,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
     async def quotes_add(self, interaction: discord.ApplicationContext,
         quote: Option(str, "Enter the quote"),
         author: Option(discord.Member, "Person who said the quote.")):
-        
-        # file = manager.check_channel(interaction,guild_info)
-         
-        # if file == "Wrong_channel":
-          # response = "**you sussy baka! you can't use this command here:raised_hand:**\ngo to the quotes channel to use it :rolling_eyes:"
-          # embed = discord.Embed(description=response, color=0xe0a8cf)
-          # await interaction.respond(embed = embed)
 
-        # else:
         with open("guild.json") as file:
             guild = json.load(file)
             
@@ -52,18 +43,21 @@ class Quotes(commands.Cog, name="quotes-slash"):
         quote_exists = db_api.check_exists(data)                                                             
         
         if quote_exists==True:
-            response = "BAKA!! That quote by "+str(author.name)+ " is already there."
+            response = f"BAKA!! That quote by {author.name} is already there."
 
             
         else:
             data = db_api.insert(data)
-            response = "**"+quote+"**"
+            response = f"**{quote}**"
                 
         embed = discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"])
         
         if quote_exists==False:
             embed.set_footer(text=f"Id:{data['id']}")
-            embed.set_author(name=author.name)
+            if message.guild.icon != None:
+                embed.set_author(name=author, icon_url=interaction.guild.icon.url)
+            else: 
+                embed.set_author(name=author)
             if author.display_avatar != None:
                 embed.set_thumbnail(url=author.display_avatar.url)
             
@@ -82,7 +76,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
         with open("guild.json") as file:
             guild = json.load(file)
 
-        if guild[str(interaction.guild.id)]["nsfw"]:
+        if "nsfw" in guild[str(interaction.guild.id)]["quotes"]:
             if interaction.channel.is_nsfw():
                 nsfw = 1
             else:
@@ -102,7 +96,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
         else:
             title="__QUOTES__"
             if author:
-                title="__QUOTES BY "+ str(author.display_name)+"__"
+                title=f"__QUOTES BY {author.display_name}__"
 
             paginationList = []
             n=len(quotes)
@@ -114,9 +108,9 @@ class Quotes(commands.Cog, name="quotes-slash"):
                         break
                     row=num+1
                     quote_dict = quotes[num]
-                    Quote = quote_dict["quote"]                                                     
+                    Quote = quote_dict["quote"]
                     Author = quote_dict["name"]                                                     
-                    response = response +"**__Quote "+ str(row)+"__**\n*"+Quote +"\n~ "+Author+"*\n\n"           
+                    response = response + f"**__Quote {row}__**\n*{Quote} \n~ {Author}*\n\n"           
 
                 paginationList.append(discord.Embed(title=title, description = response, color=guild[str(interaction.guild.id)]["color"]))
                 if k>n:

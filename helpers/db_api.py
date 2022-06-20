@@ -2,7 +2,8 @@ import uuid
 import mysql.connector
 
 def connect_to_db():
-    conn = mysql.connector.connect(user='u64799_CoAur2VxCy', password='KI39N7.=vQg++lzzlM29Fhs!', host='212.192.28.120', database='s64799_yusei')
+    conn = mysql.connector.connect(user='u64799_BX2pfS2SPV', password='QoH4SMHEhS+8@e!qSf^cl=vn', host='212.192.28.120', database='s64799_tester')
+    #conn = mysql.connector.connect(user='u64799_CoAur2VxCy', password='KI39N7.=vQg++lzzlM29Fhs!', host='212.192.28.120', database='s64799_yusei')
     return conn
 
 def create_db_table(query,table=''):
@@ -10,8 +11,8 @@ def create_db_table(query,table=''):
         conn = connect_to_db()
         
         if table!='':
-          conn.execute(f'''DROP TABLE {table}''')
-  
+          	conn.execute(f'''DROP TABLE {table}''')
+
         conn.execute(f'''{query}''')
 
         conn.commit()
@@ -29,15 +30,13 @@ def insert(data):
        
         if data['table'] == "quotes":
             data['id'] = uuid.uuid4().hex[:8]
+            data['name'] = data['name'].replace("'","%%%")
+            data['quote'] = data['quote'].replace("'","%%%")
             cur.execute(f"INSERT INTO `quotes` (`id`, `user_id`, `name`, `quote`, `nsfw`, `guild_id`) VALUES ('{data['id']}', '{data['user_id']}', '{data['name']}', '{data['quote']}', '{data['nsfw']}', '{data['guild_id']}');")
 
         elif data['table'] == "birthday":
-            year = ""
-            yr = ""
-            if not math.isnan(data['Year']):
-                year = f",'{data['Year']}'"
-                yr = ",year"
-            cur.execute(f"INSERT INTO `birthday` (user_id,name,day,month{yr}) VALUES ('{data['Id']}', '{data['Name']}', '{data['Day']}','{data['Month']}'{year});")
+            data['name'] = data['name'].replace("'","%%%")
+            cur.execute(f"INSERT INTO `birthday` (user_id,name,day,month) VALUES ('{data['user_id']}', '{data['name']}', '{data['day']}', '{data['month']}');")
 
 
         conn.commit()
@@ -57,6 +56,7 @@ def check_exists(data):
         cur = conn.cursor()
       
         if data['table'] == "quotes":
+            data['quote'] = data['quote'].replace("'","%%%")
             cur.execute(f"SELECT * FROM `quotes` WHERE `guild_id` = '{data['guild_id']}' and user_id = '{data['user_id']}' and quote = '{data['quote']}'")
 
         elif data['table'] == "birthday":
@@ -99,6 +99,8 @@ def get_quotes(data):
             quote["quote"] = row["quote"]
             quote["nsfw"] = row["nsfw"]
             quote["guild_id"] = row["guild_id"]
+            quote['name'] = quote['name'].replace("%%%","'")
+            quote['quote'] = quote['quote'].replace("%%%","'")
             quotes.append(quote)
 
     except Exception as e:
@@ -111,9 +113,8 @@ def get_quote_by_id(id):
     quote = {}
     try:
         conn = connect_to_db()
-        conn.row_factory = sqlite3.Row
-        cur = conn.cursor()
-        cur.execute(f"SELECT * FROM `quotes` WHERE id = '{id}' and nsfw = '{data['nsfw']}' ")
+        cur = conn.cursor(dictionary=True)
+        cur.execute(f"SELECT * FROM `quotes` WHERE id = '{id}'")
         row = cur.fetchone()
         if row==None:
             return "Quote does not exist"
@@ -125,6 +126,8 @@ def get_quote_by_id(id):
         quote["quote"] = row["quote"]
         quote["nsfw"] = row["nsfw"]
         quote["guild_id"] = row["guild_id"]
+        quote['name'] = quote['name'].replace("%%%","'")
+        quote['quote'] = quote['quote'].replace("%%%","'")
     except Exception as e:
         print(f"Error retriving quote with id = {id}: {e}")
         quote = {}
@@ -138,16 +141,18 @@ def get_birthdays(data):
     limit=""
     if 'user_id' in data and data['user_id']:
         search = f"WHERE `user_id` = '{data['user_id']}'"
-    if 'date' in data and data['date']:
+    elif 'date' in data and data['date']:
         search = f"WHERE `month`>'{data['date']}'"
         limit = f"LIMIT {data['limit']}"
+    elif 'day' in data and data['day']:
+        search = f"WHERE `month`='{data['month']}' and `day`='{data['day']}'"
     try:
         conn = connect_to_db()
         cur = conn.cursor(dictionary=True)
         cur.execute(f"SELECT * FROM `birthday` {search} ORDER BY `month`,`day` {limit};")
         rows = cur.fetchall()
         if not rows:
-            return f"User <@!{data['user_id']}> did not set their birthday" if data['user_id'] else "No birthdays have been set"
+            return birthdays
             
         for row in rows:
             birthday = {}
@@ -155,7 +160,7 @@ def get_birthdays(data):
             birthday["name"] = row["name"]
             birthday["day"] = row["day"]
             birthday["month"] = row["month"]
-            birthday["year"] = row["year"]
+            birthday['name'] = birthday['name'].replace("%%%","'")
             birthdays.append(birthday)
 
     except Exception as e:

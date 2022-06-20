@@ -1,15 +1,54 @@
+from pickle import TRUE
 import discord
 from discord.commands import SlashCommandGroup
 from discord import Option
 from discord.ext import commands
 import json
-
 from helpers import json_manager, checks, converters
 
 class Owner(commands.Cog, name="owner-slash"):
     def __init__(self, bot):
         self.bot = bot
     
+    echo = SlashCommandGroup("echo", "Send custom msgs")
+
+    @echo.command(
+        name="embed",
+        description="sends an embed",
+        guild=["736101194300129390,976119050071605288"]
+        )
+    @checks.is_owner()
+    async def embed(self, interaction: discord.ApplicationContext,
+                    description : Option(str, "The desc of the embed",required=True),
+                    title : Option(str, "The title of the embed",default=None),
+                    color : Option(str, "The color of the embed",default="FF0000")):
+
+
+        color = color.strip()
+        color = color.lstrip('#')
+        color = int(color,16)
+        
+        embed = discord.Embed(
+                title=title,
+                description=description,
+                color=color
+            )
+        await interaction.send(embed=embed)
+        await interaction.respond("Embed Sent",ephemeral=True)
+
+    @echo.command(
+        name="message",
+        description="Sends a message as the bot",
+        guild=["736101194300129390,976119050071605288"]
+        )
+    @checks.is_owner()
+    async def message(self, interaction: discord.ApplicationContext,
+                    message : Option(str, "Text to send")):
+        
+        await interaction.send(message)
+        
+        await interaction.respond("Message Sent",ephemeral=True)
+
     blacklist = SlashCommandGroup("blacklist", "Get the list of all blacklisted users.")
 
     @blacklist.command(
@@ -17,13 +56,14 @@ class Owner(commands.Cog, name="owner-slash"):
         description="Lets you add a user from not being able to use the bot.",
         guild=["736101194300129390"]
         )
-    @checks.is_owner()
-    async def blacklist_add(self, interaction: discord.ApplicationContext, member_or_channel: Option(converters.ChannelOrMemberConverter, "The @user/#channel you want to add to the blacklist.", default = None)) -> None:
+    @checks.not_blacklisted()
+    async def blacklist_add(self, interaction: discord.ApplicationContext, member_or_channel: Option(converters.ChannelOrMemberConverter, "The @user/#channel you want to add to the blacklist.", default = None)):
         """
         Lets you add a user/channel from not being able to use the bot.
         :param interaction: The application command interaction.
         :param user: The user/channel that should be added to the blacklist.
         """
+            
         Object = member_or_channel
         try:
             if isinstance(Object,discord.TextChannel):
@@ -35,14 +75,14 @@ class Owner(commands.Cog, name="owner-slash"):
 
             with open("blacklist.json") as file:
                 blacklist = json.load(file)
-            if object_id in blacklist[json_key]:
+            if object_id in blacklist[interaction.guild.id][json_key]:
                 embed = discord.Embed(
                     title="Error!",
                     description=f"**{Object.name}** is already in the blacklist.",
                     color=0xE02B2B
                 )
                 return await interaction.respond(embed=embed)
-            json_manager.add_to_blacklist(json_key,object_id)
+            json_manager.add_to_blacklist(interaction.guild.id,json_key,object_id)
             embed = discord.Embed(
                 title="User Blacklisted",
                 description=f"**{Object.name}** has been successfully added to the blacklist",
@@ -51,7 +91,7 @@ class Owner(commands.Cog, name="owner-slash"):
             with open("blacklist.json") as file:
                 blacklist = json.load(file)
             embed.set_footer(
-                text=f"There are now {len(blacklist[json_key])} {json_key}'s in the blacklist"
+                text=f"There are now {len(blacklist[interaction.guild.id][json_key])} {json_key} in the blacklist"
             )
             await interaction.respond(embed=embed)
         except Exception as exception:
@@ -67,8 +107,7 @@ class Owner(commands.Cog, name="owner-slash"):
         description="Lets you remove a user from not being able to use the bot.",
         guild=["736101194300129390"]
         )
-        
-    @checks.is_owner()
+    @checks.not_blacklisted()
     async def blacklist_remove(self, interaction: discord.ApplicationContext, member_or_channel: Option(converters.ChannelOrMemberConverter, "The @user/#channel you want to remove from the blacklist.", default = None)):
         """
         Lets you remove a user/channel from not being able to use the bot.
@@ -85,14 +124,14 @@ class Owner(commands.Cog, name="owner-slash"):
             object_id = Object.id
             with open("blacklist.json") as file:
                 blacklist = json.load(file)
-            if object_id not in blacklist[json_key]:
+            if object_id not in blacklist[interaction.guild.id][json_key]:
                 embed = discord.Embed(
                     title="Error!",
                     description=f"**{Object.name}** is not in the blacklist.",
                     color=0xE02B2B
                 )
                 return await interaction.respond(embed=embed)
-            json_manager.remove_from_blacklist(json_key,object_id)
+            json_manager.remove_from_blacklist(interaction.guild.id,json_key,object_id)
             embed = discord.Embed(
                 title="User removed from blacklist",
                 description=f"**{Object.name}** has been successfully removed from the blacklist",
@@ -101,7 +140,7 @@ class Owner(commands.Cog, name="owner-slash"):
             with open("blacklist.json") as file:
                 blacklist = json.load(file)
             embed.set_footer(
-                text=f"There are now {len(blacklist[json_key])} {json_key} users in the blacklist"
+                text=f"There are now {len(blacklist[interaction.guild.id][json_key])} {json_key} in the blacklist"
             )
             await interaction.respond(embed=embed)
         except Exception as exception:

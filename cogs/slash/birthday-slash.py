@@ -1,15 +1,96 @@
+from random import choices
 import discord
-import datetime
-import json
-from discord.ext import pages
-from discord.ext import commands
+import json, datetime, asyncio
+from discord.ext import pages, commands, tasks
 from discord.commands import Option, SlashCommandGroup
 from helpers import checks, db_api
+
+def suffix_helper(val):
+    if val in [1, 21, 31, 41, 51, 61, 71]:
+        suffix = "st"
+    elif val in [2, 22, 32, 42, 52, 62, 72]:
+        suffix = "nd"
+    elif val in [3, 23, 33, 43, 53, 63, 73]:
+        suffix = "rd"
+    else:
+        suffix = "th"
         
+    return suffix
+
+IST = datetime.time(second=5)
 class Birthday(commands.Cog, name="birthday-slash"):
     def __init__(self, bot):
         self.bot = bot
+        self.wish.start()
     
+    @tasks.loop(hours=5)
+    async def wish(self):
+        
+        today = datetime.datetime.now()
+        if IST.hour == today.hour:
+
+            data = {
+            'month':today.month,
+            'day':today.day
+            }
+   
+            with open("guild.json") as file:
+                guild_json = json.load(file)
+                
+            birthdays_today = db_api.get_birthdays(data)
+            
+            for server_key in guild_json:
+                
+                guild = self.bot.get_guild(int(server_key))
+                
+                role=None
+                server = guild_json[server_key]
+                if 'birthday' not in server:
+                    continue
+
+                if 'role' in server['birthday']:
+                    role = guild.get_role(guild_json[server_key]['birthday']['role'])
+                            
+                for guild_member in guild.members:
+                                
+                    if 'role' in server['birthday'] and role in guild_member.roles and not any(d['user_id'] == guild_member.id for d in birthdays_today):
+                        print(f"removed {role} from {guild_member} in {guild.name}\n")
+                        await guild_member.remove_roles(role)
+
+                for i in range(0,len(birthdays_today)):
+                    bday = birthdays_today[i]
+                    user_id = bday["user_id"]
+                        
+                    channel = self.bot.get_channel(server['birthday']['channel'])
+
+                    for guild_member in guild.members:
+                        if user_id != guild_member.id:
+                            continue
+                            
+                        response = server['birthday']['message'] if 'message' in server['birthday'] else "Happy Birthday {user}!"
+                        mention_role = server['birthday']['mention'] if 'mention' in server['birthday'] else ""
+                        mapping = {'{user}': f"{guild_member.display_name}",'{user.mention}' : f"{guild_member.mention}",'{server}' : f"{guild.name}"}
+                            
+                        for key in mapping:
+                            response = response.replace(key, mapping[key])
+                            #mention_role = mention_role.replace(key, mapping[key])
+
+
+                        make_embed = discord.Embed(description=response, color=guild_json[server_key]["color"])
+                        await channel.send(f"{mention_role}",embed=make_embed)
+
+                        if role!=None:
+                                
+                            print(f"Added {role} to {guild_member} in {guild.name}\n")
+                            await guild_member.add_roles(role)
+                        
+                        
+
+    @wish.before_loop
+    async def before_wish(self):
+        print('waiting.......')
+        await self.bot.wait_until_ready()
+
     bday = SlashCommandGroup("bday", "Birthday related commands")
 
     @bday.command(
@@ -20,17 +101,12 @@ class Birthday(commands.Cog, name="birthday-slash"):
     @checks.not_blacklisted()
     async def bday_set(self, interaction: discord.ApplicationContext,
         day: Option(int, "Enter your birthday",min_value=1,max_value=31,required=True),
-        month_name: Option(str, name="month", description="Enter your birthday",choices=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],required=True),
-        year: Option(int, "Enter your birthday",min_value=1920,max_value=2009,default=None)):
+        month_name: Option(str, name="month", description="Enter your birthday",choices=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],required=True)):
 
-        if day in [1, 21, 31, 41, 51, 61, 71]:
-            Dsuffix = "st"
-        elif day in [2, 22, 32, 42, 52, 62, 72]:
-            Dsuffix = "nd"
-        elif day in [3, 23, 33, 43, 53, 63, 73]:
-            Dsuffix = "rd"
-        else:
-            Dsuffix = "th"
+        suffix = suffix_helper(day)
+        
+        with open("guild.json") as file:
+            guild = json.load(file)
             
         member = interaction.user
 
@@ -42,7 +118,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
 
         except Exception as e:
             print(f"Error in birthday object: {e}")
-            await interaction.respond(f"Please enter a valid birthday **{day}{Dsuffix} {month_name}** doesn't make sense",ephemeral=True)
+            await interaction.respond(f"Please enter a valid birthday **{day}{suffix} {month_name}** doesn't make sense",ephemeral=True)
             return
 
         data = {
@@ -50,8 +126,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
             "user_id": member.id,
             "name": member.display_name,
             "day": day,
-            "month": month_number,
-            "year": year
+            "month": month_number
         }
 
         birthday_exists = db_api.check_exists(data)
@@ -68,31 +143,16 @@ class Birthday(commands.Cog, name="birthday-slash"):
                 difference = DMtoday.date() - date_object.date()
             else:
                 difference = date_object.date() - DMtoday.date()
-        
-            if year:
-                age = today.year - year
-                if age in [1, 21, 31, 41, 51, 61, 71]:
-                    suffix = "st"
-                elif age in [2, 22, 32, 42, 52, 62, 72]:
-                    suffix = "nd"
-                elif age in [3, 23, 33, 43, 53, 63, 73]:
-                    suffix = "rd"
-                else:
-                    suffix = "th"
-
-                response = f"Succesfully set your birthday to **{day}{Dsuffix} {month_name} {year}**\n i will wish your **{age}{suffix}** birthday in **{difference.days}** days"
-
-            else:
-    
-                response = f"Succesfully set your birthday to **{day}{Dsuffix} {month_name}**\n i will wish you in **{difference.days}** days"
+            
+            response = f"Succesfully set your birthday to **{day}{suffix} {month_name}**\n i will wish you in **{difference.days}** days" if int(difference.days)>0 else "Succesfully set your birthday to **{day}{suffix} {month_name}**\n **Have the happiest of birthdays {member.mention}"
         
         make_embed = discord.Embed(title=member.display_name,
                                     description=response,
-                                    color=0xe0a8cf)
+                                    color=guild[str(interaction.guild.id)]["color"])
         if member.display_avatar:
             make_embed.set_thumbnail(url=member.display_avatar.url)
         await interaction.respond(embed=make_embed)
-
+    
     @bday.command(
         name="view",
         description="View birthdays"
@@ -105,92 +165,104 @@ class Birthday(commands.Cog, name="birthday-slash"):
         
         today = datetime.datetime.now()
         data = {'user_id':member.id if member else None}
-        birthdays = db_api.get_birthdays(data)
+        birthday_list = db_api.get_birthdays(data)
+        birthdays =[]
+        for user in birthday_list:
+            flag=False
+            for guild_member in interaction.guild.members:
+                if user["user_id"] == guild_member.id:
+                    flag=True
+            if flag==True:
+                birthdays.append(user)
+                
+        del birthday_list
         
         with open("guild.json") as file:
             guild = json.load(file)
-
-        if member:
-            birthday_dict = birthdays[0]
-            name = birthday_dict["name"]
-            day = birthday_dict["day"]
-            month = birthday_dict["month"]
-            dat = datetime.datetime(today.year, month, day)
-            dat = dat.strftime("%B")
-            if day in [1, 21, 31, 41, 51, 61, 71]:
-                suffix = "st"
-            elif day in [2, 22, 32, 42, 52, 62, 72]:
-                suffix = "nd"
-            elif day in [3, 23, 33, 43, 53, 63, 73]:
-                suffix = "rd"
-            else:
-                suffix = "th"
-            make_embed = discord.Embed(description=f"{name}'s birthday is on {day}{suffix} {dat}",
-                                        color=guild[str(interaction.guild.id)]["color"])
-              
-            if interaction.guild.icon != None:
-                make_embed.set_thumbnail(url=interaction.guild.icon.url)
-            await interaction.respond(embed=make_embed)
+            
+        if not birthdays:
+        	await interaction.respond(f"User <@!{data['user_id']}> did not set their birthday here or is not in the server" if data['user_id'] else "No birthdays have been set")
 
         else:
-            n = len(birthdays)
-            paginationList = []
+            if member:
+                
+                birthday_dict = birthdays[0]
+                user_id = birthday_dict["user_id"]
+                name = birthday_dict["name"]
+                day = birthday_dict["day"]
+                month = birthday_dict["month"]
+                dat = datetime.datetime(today.year, month, day)
+                dat = dat.strftime("%B")
+                suffix = suffix_helper(day)
 
-            k = 10
-            for i in range(0, n, 10):
-                response = "*To set your birthday use `/bday set`*\n\n"
-                
-                for num in range(i, k):
-                    if k > n and num == n:
-                        break
-                
-                    birthday_dict = birthdays[num]
-                    name = birthday_dict["name"]
-                    day = birthday_dict["day"]
-                    month = birthday_dict["month"]
-                    dat = datetime.datetime(today.year, month, day)
-                    dat = dat.strftime("%B")
-                    if day in [1, 21, 31, 41, 51, 61, 71]:
-                        suffix = "st"
-                    elif day in [2, 22, 32, 42, 52, 62, 72]:
-                        suffix = "nd"
-                    elif day in [3, 23, 33, 43, 53, 63, 73]:
-                        suffix = "rd"
-                    else:
-                        suffix = "th"
-                    response = response + f"__{day}{suffix} {dat}__: **{name}**\n" 
-                    
-                make_embed = discord.Embed(title="__Birthdays__",
-                                        description=response,
-                                        color=guild[str(interaction.guild.id)]["color"])
-              
+                date_object = datetime.datetime.strptime(f"{day}/{month}", "%d/%m")
+                DMtoday = datetime.datetime.strptime(today.strftime("%d/%m"), "%d/%m")
+
+                if today.month > month or (today.month == month and today.day > day):
+                    difference = DMtoday.date() - date_object.date()
+                else:
+                    difference = date_object.date() - DMtoday.date()
+
+                make_embed = discord.Embed(title=f"{name}",description=f"<@{user_id}>'s birthday is on **{day}{suffix} {dat}** in **{difference.days}** days",
+                                            color=guild[str(interaction.guild.id)]["color"])
+
                 if interaction.guild.icon != None:
                     make_embed.set_thumbnail(url=interaction.guild.icon.url)
-                make_embed.set_footer(text=f"Total Birthdays: {n} | 10 per page")
-                paginationList.append(make_embed)
-                if k > n:
-                    break
-                k += 10
+                await interaction.respond(embed=make_embed)
 
-            paginator = pages.Paginator(pages=paginationList, use_default_buttons=False, show_menu=False, loop_pages=False, timeout=40.0)
-            paginator.add_button(
-                pages.PaginatorButton("first", label="<<", style=discord.ButtonStyle.red)
-            )
-            paginator.add_button(
-            pages.PaginatorButton("prev", label="<", style=discord.ButtonStyle.red)
-            )
-            paginator.add_button(
-                pages.PaginatorButton(
-                    "page_indicator", style=discord.ButtonStyle.gray, disabled=True
+            else:
+
+                n = len(birthdays)
+                paginationList = []
+
+                k = 10
+                for i in range(0, n, 10):
+                    response = "*To set your birthday use `/bday set`*\n\n"
+
+                    for num in range(i, k):
+                        if k > n and num == n:
+                            break
+
+                        birthday_dict = birthdays[num]
+                        name = birthday_dict["name"]
+                        day = birthday_dict["day"]
+                        month = birthday_dict["month"]
+                        dat = datetime.datetime(today.year, month, day)
+                        dat = dat.strftime("%B")
+                        suffix = suffix_helper(day)
+                        response = response + f"__{day}{suffix} {dat}__: **{name}**\n" 
+
+                    make_embed = discord.Embed(title="__Birthdays__",
+                                            description=response,
+                                            color=guild[str(interaction.guild.id)]["color"])
+
+                    if interaction.guild.icon != None:
+                        make_embed.set_thumbnail(url=interaction.guild.icon.url)
+                    make_embed.set_footer(text=f"Total Birthdays: {n} | 10 per page")
+                    paginationList.append(make_embed)
+                    if k > n:
+                        break
+                    k += 10
+
+                paginator = pages.Paginator(pages=paginationList, use_default_buttons=False, show_menu=False, loop_pages=False, timeout=40.0)
+                paginator.add_button(
+                    pages.PaginatorButton("first", label="<<", style=discord.ButtonStyle.red)
                 )
-            )
-            paginator.add_button(
-                pages.PaginatorButton("next", label=">", style=discord.ButtonStyle.red)
-            )
-            paginator.add_button(
-                pages.PaginatorButton("last", label=">>", style=discord.ButtonStyle.red)
-            )
-            await paginator.respond(interaction.interaction)
+                paginator.add_button(
+                pages.PaginatorButton("prev", label="<", style=discord.ButtonStyle.red)
+                )
+                paginator.add_button(
+                    pages.PaginatorButton(
+                        "page_indicator", style=discord.ButtonStyle.gray, disabled=True
+                    )
+                )
+                paginator.add_button(
+                    pages.PaginatorButton("next", label=">", style=discord.ButtonStyle.red)
+                )
+                paginator.add_button(
+                    pages.PaginatorButton("last", label=">>", style=discord.ButtonStyle.red)
+                )
+                await paginator.respond(interaction.interaction)
 
     @bday.command(
     name="upcoming",
@@ -198,43 +270,47 @@ class Birthday(commands.Cog, name="birthday-slash"):
     )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
-    async def bday_upcoming(self, interaction: discord.ApplicationContext,
-                        number: Option(int, "How many upcoming birthdays do you want to see?",min_value=1,max_value=10,default=1)):
+    async def bday_upcoming(self, interaction: discord.ApplicationContext):
 
         today = datetime.datetime.now()
-        data = {'date':today.month,'limit':number}
-        birthdays = db_api.get_birthdays(data)
+        data = {'date':today.month,'limit':5}
+        birthday_list = db_api.get_birthdays(data)
+        birthdays =[]
+        for user in birthday_list:
+            flag=False
+            for guild_member in interaction.guild.members:
+                if user["user_id"] == guild_member.id:
+                    flag=True
+            if flag==True:
+                birthdays.append(user)
 
-        response = "*To set your birthday use `/bday set`*\n\n"
-                
-        for num in range(0, len(birthdays)):
-                
-            birthday_dict = birthdays[num]
-            name = birthday_dict["name"]
-            day = birthday_dict["day"]
-            month = birthday_dict["month"]
-            dat = datetime.datetime(today.year, month, day)
-            dat = dat.strftime("%B")
-            if day in [1, 21, 31, 41, 51, 61, 71]:
-                suffix = "st"
-            elif day in [2, 22, 32, 42, 52, 62, 72]:
-                suffix = "nd"
-            elif day in [3, 23, 33, 43, 53, 63, 73]:
-                suffix = "rd"
-            else:
-                suffix = "th"
-            response = response + f"__{day}{suffix} {dat}__: **{name}**\n" 
+        if not birthdays:
+        	await interaction.respond(f"No birthdays are set in the server")
         
-        with open("guild.json") as file:
-            guild = json.load(file)
-        make_embed = discord.Embed(title="__Birthdays__",
-                                description=response,
-                                color=guild[str(interaction.guild.id)]["color"])
+        else:
+            response = "*To set your birthday use `/bday set`*\n\n"
+                
+            for num in range(0, len(birthdays)):
+                
+                birthday_dict = birthdays[num]
+                name = birthday_dict["name"]
+                day = birthday_dict["day"]
+                month = birthday_dict["month"]
+                dat = datetime.datetime(today.year, month, day)
+                dat = dat.strftime("%B")
+                suffix = suffix_helper(day)
+                response = response + f"__{day}{suffix} {dat}__: **{name}**\n" 
+        
+            with open("guild.json") as file:
+                guild = json.load(file)
+            make_embed = discord.Embed(title="__Birthdays__",
+                                    description=response,
+                                    color=guild[str(interaction.guild.id)]["color"])
               
-        if interaction.guild.icon != None:
-            make_embed.set_thumbnail(url=interaction.guild.icon.url)
+            if interaction.guild.icon != None:
+                make_embed.set_thumbnail(url=interaction.guild.icon.url)
         
-        await interaction.respond(embed=make_embed)
+            await interaction.respond(embed=make_embed)
     
     @bday.command(
     name="remove",
@@ -242,7 +318,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
     )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
-    async def bday_view(self, interaction: discord.ApplicationContext):
+    async def bday_remove(self, interaction: discord.ApplicationContext):
         
         data = {
             "table": "birthday",
@@ -269,6 +345,73 @@ class Birthday(commands.Cog, name="birthday-slash"):
         make_embed.set_thumbnail(url=interaction.author.avatar.url)
         make_embed.set_author(name=interaction.author)
         await interaction.respond(embed=make_embed)
+    
+    @bday.command(
+    name="config",
+    description="config birthday module"
+    )
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @checks.not_blacklisted()
+    async def bday_config(self, interaction: discord.ApplicationContext,
+                            state : Option(str, name="enable",description="Turn disable/enable the birthday commands",choices=['True','False']),
+                            channel: Option(discord.TextChannel, "Set the birthday channel", default=None),
+                            message: Option(str, "Set the birthday message. {user},{user.mention},{server}",default=None),
+                            role: Option(discord.Role, "Set the role to ping.", default=None)):
+
+        with open("guild.json") as file:
+            guild = json.load(file)
+            
+        server = guild[str(interaction.guild.id)]
+
+        if state=='True' and (channel or message or role):
+            response = ""
+            if "birthday" not in server:
+                server["birthday"]={}
+                server["birthday"]["enabled"] = True
+                
+                response = response + "> **Birthday commands have been enabled**\n\n"
+                
+            if server["birthday"]["enabled"] == False:
+                server["birthday"]["enabled"] = True
+                response = response + "> **Birthday commands have been re-enabled**\n\n"
+
+            if channel:
+                server["birthday"]["channel"] = channel.id
+                response = response + f"> **Birthday Channel has been set to <#{channel.id}>**\n\n"
+
+            if message:
+                server["birthday"]["message"] = message
+                response = response + "> **Birthday Message has been set to `{message}`**\n\n"
+
+            if role:
+                server["birthday"]["role"] = role.id
+                response = response + "> **Birthday Role has been set to <@&{role.id}>**\n\n"
+
+        elif state == 'False':
+            if "birthday" in server:
+                server["birthday"]["enabled"] = False
+                response = response + "> **Birthday commands have been disabled**\n\n"
+
+        with open("guild.json", "w") as p:
+            json.dump(guild, p,indent=6)
+
+"""    @bday.command(
+    name="config",
+    description="config birthday module"
+    )
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @checks.not_blacklisted()
+    async def bday_config(self, interaction: discord.ApplicationContext,
+                            option : Option(bool, name="enable",description="Turn disable/enable the birthday commands",choices=[True,False])):
+
+        with open("guild.json") as file:
+            guild = json.load(file)
+            
+        server = guild[str(interaction.guild.id)]
+        
+        with open("guild.json", "w") as p:
+            json.dump(guild, p,indent=6)
+"""
 
 def setup(bot):
     bot.add_cog(Birthday(bot))

@@ -36,7 +36,7 @@ class Fun(commands.Cog, name="fun-slash"):
         )
         await interaction.respond(embed=embed)
         
-    @commands.slash_command(
+    @commands.slash_command( 
         name="randomfact",
         description="Get a random fact."
     )
@@ -61,10 +61,6 @@ class Fun(commands.Cog, name="fun-slash"):
                         color=14942490
                     )
                 await interaction.respond(embed=embed)
-
-
-
-
 
 def setup(bot):
     bot.add_cog(Fun(bot))

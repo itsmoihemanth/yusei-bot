@@ -7,6 +7,14 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from helpers import db_api
+import datetime
+import logging
+
+logger = logging.getLogger('discord')
+logger.setLevel(logging.DEBUG)
+handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
+handler.setFormatter(logging.Formatter('%(asctime)s:%(levelname)s:%(name)s: %(message)s'))
+logger.addHandler(handler)
 
 if not os.path.isfile("config.json"):
     sys.exit("'config.json' not found! Please add it and try again.")
@@ -22,8 +30,9 @@ async def on_ready() -> None:
     """
     The code in this even is executed when the bot is ready
     """
-
-    print(f"Logged in as {bot.user.name}")
+    
+    today = datetime.datetime.now()
+    print(f"Logged in as {bot.user.name} at {today}")
     print(f"discord API version: {discord.__version__}")
     print(f"Python version: {platform.python_version()}")
     print(f"Running on: {platform.system()} {platform.release()} ({os.name})")
@@ -55,10 +64,10 @@ async def on_application_command_error(Interaction, error):
     elif isinstance(error, commands.errors.MissingPermissions):
         await Interaction.respond(error,ephemeral=True)
     elif isinstance(error, commands.CheckFailure):
-        await Interaction.respond(error,ephemeral=True)
+        pass
     else:
         print(error, type(error))
-        await Interaction.respond("Whoops! Looks liks something's amiss",ephemeral=True)
+        await Interaction.respond(f"Whoops! Looks liks something's amiss: {error}",ephemeral=True)
 
 @bot.event
 async def on_command_error(context, error):
@@ -81,25 +90,41 @@ async def on_guild_join(guild):
     
     print(f"Bot joined {guild.name}")
 
+    with open("blacklist.json") as file:
+        blacklist_json = json.load(file)
+
     with open("guild.json") as file:
-        guild_dict = json.load(file)
+        guild_json = json.load(file)
 
-    guild_dict[str(guild.id)]={"name":f"{guild.name}", "sfw":None, "nsfw":None, "birthday":None,"color":14942490}
-    
-    with open("guild.json", "w") as p:
-            json.dump(guild_dict, p,indent=6)
+    blacklist_json[str(guild.id)]={"name":f"{guild.name}","user_ids":[],"channel_ids":[]}
+    guild_json[str(guild.id)]= {"name":f"{guild.name}","color":14942490}
 
+    with open("guild.json", "w") as g:
+            json.dump(guild_json, g,indent=6)
+
+    with open("blacklist.json", "w") as b:
+            json.dump(blacklist_json, b,indent=6)
+            
 @bot.event
 async def on_guild_remove(guild):
 
-    with open("guild.json") as file:
-            guild_dict = json.load(file)
+    with open("blacklist.json") as file:
+            blacklist_json = json.load(file)
 
-    removed_value = guild_dict.pop(str(guild.id), 'Guild not found')
-    print(f"Bot has been removed from {guild.name}")
+    with open("guild.json") as file:
+        guild_json = json.load(file)
+
+    blacklist_json.pop(str(guild.id), 'Guild not found')
+    guild_json.pop(str(guild.id), 'Guild not found')
+
+    with open("guild.json", "w") as g:
+            json.dump(guild_json, g,indent=6)
+            
+    with open("blacklist.json", "w") as p:
+            json.dump(blacklist_json, p,indent=6)
+
     
-    with open("guild.json", "w") as p:
-            json.dump(guild_dict, p,indent=6)
+    print(f"Bot has been removed from {guild.name}")
 
 @bot.event
 async def on_raw_reaction_add(payload):
@@ -110,21 +135,24 @@ async def on_raw_reaction_add(payload):
             with open("guild.json") as file:
                 guild = json.load(file)
 
+            server = guild[str(payload.guild_id)]
+            if "quotes" not in server:
+                return
             if message.channel.is_nsfw():
-                if guild[str(payload.guild_id)]["nsfw"]:
-                    channel = bot.get_channel(guild[str(payload.guild_id)]["nsfw"])
+                if "nsfw" in server["quotes"]:
+                    channel = bot.get_channel(server["quotes"]["nsfw"])
                 else:
                     await message.reply("Please set the channel to use for nsfw quotes using /config")
                 nsfw = 1
             else:
-                if guild[str(payload.guild_id)]["sfw"]:
-                    channel = bot.get_channel(guild[str(payload.guild_id)]["sfw"])
+                if "sfw" in server["quotes"]:
+                    channel = bot.get_channel(server["quotes"]["sfw"])
                 else:
                     await message.reply("Please set the channel to use for sfw quotes using /config")
                 nsfw = 0
 
             embed = discord.Embed(description=f"{message.content}\n\n[Jump to message]({message.jump_url})",
-                                    colour=guild[str(payload.guild_id)]["color"])
+                                    colour=server["color"])
                                 
             data = {
                     "table": "quotes",

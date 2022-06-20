@@ -101,18 +101,18 @@ class Quotes(commands.Cog, name="quotes-slash"):
             paginationList = []
             n=len(quotes)
             k = 5
+            embed = discord.Embed(title=title, color=guild[str(interaction.guild.id)]["color"])
             for i in range(0,n,5):
-                response=""
                 for num in range(i,k):
                     if k>n and num==n:
                         break
                     row=num+1
                     quote_dict = quotes[num]
                     Quote = quote_dict["quote"]
-                    Author = quote_dict["name"]                                                     
-                    response = response + f"**__Quote {row}__**\n*{Quote} \n~ {Author}*\n\n"           
+                    Author = quote_dict["name"]           
+                    embed.add_field(name=f"__Quote {row}__", value=f"*{Quote} \n~ {Author}*", inline=False)
 
-                paginationList.append(discord.Embed(title=title, description = response, color=guild[str(interaction.guild.id)]["color"]))
+                paginationList.append(embed)
                 if k>n:
                     break
                 k+=5

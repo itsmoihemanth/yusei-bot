@@ -101,8 +101,8 @@ class Quotes(commands.Cog, name="quotes-slash"):
             paginationList = []
             n=len(quotes)
             k = 5
-            embed = discord.Embed(title=title, color=guild[str(interaction.guild.id)]["color"])
             for i in range(0,n,5):
+                embed = discord.Embed(title=title, color=guild[str(interaction.guild.id)]["color"])
                 for num in range(i,k):
                     if k>n and num==n:
                         break

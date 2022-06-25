@@ -23,7 +23,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
         self.bot = bot
         self.wish.start()
     
-    @tasks.loop(hours=5)
+    @tasks.loop(hours=1)
     async def wish(self):
         
         today = datetime.datetime.now()
@@ -73,7 +73,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
                             
                         for key in mapping:
                             response = response.replace(key, mapping[key])
-                            #mention_role = mention_role.replace(key, mapping[key])
+                            mention_role = mention_role.replace(key, mapping[key])
 
 
                         make_embed = discord.Embed(description=response, color=guild_json[server_key]["color"])
@@ -137,11 +137,13 @@ class Birthday(commands.Cog, name="birthday-slash"):
             data = db_api.insert(data)
 
             today = datetime.datetime.now()
-            DMtoday = datetime.datetime.strptime(today.strftime("%d/%m"), "%d/%m")
-
+             
             if today.month > month_number or (today.month == month_number and today.day > day):
-                difference = DMtoday.date() - date_object.date()
+                date_object = datetime.datetime.strptime(f"{day}/{month_number}/{today.year+1}", "%d/%m/%y")
+                DMtoday = datetime.datetime.strptime(today.strftime("%d/%m/%y"), "%d/%m/%y")
+                difference = date_object.date() - DMtoday.date()
             else:
+                DMtoday = datetime.datetime.strptime(today.strftime("%d/%m"), "%d/%m")
                 difference = date_object.date() - DMtoday.date()
             
             response = f"Succesfully set your birthday to **{day}{suffix} {month_name}**\n i will wish you in **{difference.days}** days" if int(difference.days)>0 else "Succesfully set your birthday to **{day}{suffix} {month_name}**\n **Have the happiest of birthdays {member.mention}"
@@ -353,18 +355,19 @@ class Birthday(commands.Cog, name="birthday-slash"):
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
     async def bday_config(self, interaction: discord.ApplicationContext,
-                            state : Option(str, name="enable",description="Turn disable/enable the birthday commands",choices=['True','False']),
-                            channel: Option(discord.TextChannel, "Set the birthday channel", default=None),
-                            message: Option(str, "Set the birthday message. {user},{user.mention},{server}",default=None),
-                            role: Option(discord.Role, "Set the role to ping.", default=None)):
+                            disable : Option(str,description="Turn disable/enable the birthday commands",choices=["True","False"],required=True),
+                            channel: Option(discord.TextChannel, "Set the birthday channel",required=False),
+                            message: Option(str, "Set the birthday message. {user},{user.mention},{server}",required=False),
+                            mention: Option(str, "Set the role to ping. {user.mention} or @role",required=False),
+                            role: Option(discord.Role, "Set the role to assign to birthday user.",required=False)):
 
         with open("guild.json") as file:
             guild = json.load(file)
             
         server = guild[str(interaction.guild.id)]
 
-        if state=='True' and (channel or message or role):
-            response = ""
+        response = ""
+        if disable=='False' and (channel or message or role):
             if "birthday" not in server:
                 server["birthday"]={}
                 server["birthday"]["enabled"] = True
@@ -383,11 +386,15 @@ class Birthday(commands.Cog, name="birthday-slash"):
                 server["birthday"]["message"] = message
                 response = response + "> **Birthday Message has been set to `{message}`**\n\n"
 
+            if mention:
+                server["birthday"]["mention"] = mention
+                response = response + "> **mention has been set to `{mention}`**\n\n"
+
             if role:
                 server["birthday"]["role"] = role.id
                 response = response + "> **Birthday Role has been set to <@&{role.id}>**\n\n"
 
-        elif state == 'False':
+        elif disable == 'True':
             if "birthday" in server:
                 server["birthday"]["enabled"] = False
                 response = response + "> **Birthday commands have been disabled**\n\n"
@@ -395,23 +402,8 @@ class Birthday(commands.Cog, name="birthday-slash"):
         with open("guild.json", "w") as p:
             json.dump(guild, p,indent=6)
 
-"""    @bday.command(
-    name="config",
-    description="config birthday module"
-    )
-    @commands.cooldown(1, 5, commands.BucketType.guild)
-    @checks.not_blacklisted()
-    async def bday_config(self, interaction: discord.ApplicationContext,
-                            option : Option(bool, name="enable",description="Turn disable/enable the birthday commands",choices=[True,False])):
-
-        with open("guild.json") as file:
-            guild = json.load(file)
-            
-        server = guild[str(interaction.guild.id)]
-        
-        with open("guild.json", "w") as p:
-            json.dump(guild, p,indent=6)
-"""
+        if response!="":
+            await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
 
 def setup(bot):
     bot.add_cog(Birthday(bot))

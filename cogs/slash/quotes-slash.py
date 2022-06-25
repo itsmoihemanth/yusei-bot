@@ -54,7 +54,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
         
         if quote_exists==False:
             embed.set_footer(text=f"Id:{data['id']}")
-            if message.guild.icon != None:
+            if interaction.guild.icon != None:
                 embed.set_author(name=author, icon_url=interaction.guild.icon.url)
             else: 
                 embed.set_author(name=author)
@@ -136,6 +136,55 @@ class Quotes(commands.Cog, name="quotes-slash"):
                 pages.PaginatorButton("last", label=">>", style=discord.ButtonStyle.red)
             )
             await paginator.respond(interaction.interaction)
+
+    @quotes.command(
+    name="config",
+    description="config quotes module"
+    )
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @checks.not_blacklisted()
+    async def bday_config(self, interaction: discord.ApplicationContext,
+                            disable : Option(str,description="Turn disable/enable the quotes commands",choices=["True","False"],required=True),
+                            sfw_channel: Option(discord.TextChannel, "Set the sfw quotes channel",required=False),
+                            nsfw_channel: Option(discord.TextChannel, "Set the nsfw quotes channel",required=False)):
+
+        with open("guild.json") as file:
+            guild = json.load(file)
+            
+        server = guild[str(interaction.guild.id)]
+
+        
+        response = ""
+        if disable=='False' and (sfw_channel or nsfw_channel):
+            if "quotes" not in server:
+                server["quotes"]={}
+                server["quotes"]["enabled"] = True
+                
+                response = response + "> **quotes commands have been enabled**\n\n"
+                
+            if server["quotes"]["enabled"] == False:
+                server["quotes"]["enabled"] = True
+                response = response + "> **quotes commands have been re-enabled**\n\n"
+
+            if sfw_channel:
+                server["quotes"]["channel"] = sfw_channel.id
+                response = response + f"> **quotes Channel has been set to <#{sfw_channel.id}>**\n\n"
+
+            if nsfw_channel:
+                server["quotes"]["channel"] = nsfw_channel.id
+                response = response + f"> **quotes Channel has been set to <#{nsfw_channel.id}>**\n\n"
+                
+        elif disable == 'True':
+            if "quotes" in server:
+                server["quotes"]["enabled"] = False
+                response = response + "> **quotes commands have been disabled**\n\n"
+
+        with open("guild.json", "w") as p:
+            json.dump(guild, p,indent=6)
+
+        
+        if response!="":
+            await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
 
 def setup(bot):
     bot.add_cog(Quotes(bot))

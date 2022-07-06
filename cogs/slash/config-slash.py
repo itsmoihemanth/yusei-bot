@@ -12,39 +12,43 @@ class Config(commands.Cog, name="config-slash"):
     config = SlashCommandGroup("config", "config related commands")
 
     @config.command(
-        name="channels",
+        name="quotes",
         description="Config the quotes module"
         )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
     @commands.has_permissions(administrator=True)
     async def config_quotes(self, interaction: discord.ApplicationContext, 
-                            sfw_channel: Option(discord.TextChannel, "Set the quotes channel", default=None),
+                            sfw_channel: Option(discord.TextChannel, "Set the quotes channel",required=True),
                             nsfw_channel: Option(discord.TextChannel, "Set the nsfw quotes channel", default=None),
                             birthday_channel: Option(discord.TextChannel, "Set the birthday channel", default=None)):
-
         with open("guild.json") as file:
             guild = json.load(file)
-
-        if sfw_channel!=None:
-            guild[str(interaction.guild.id)]["sfw"]=sfw_channel.id
-
-        if nsfw_channel!=None:
-            guild[str(interaction.guild.id)]["nsfw"]=nsfw_channel.id
             
-        if birthday_channel!=None:
-            guild[str(interaction.guild.id)]["birthday"]=birthday_channel.id
-
+        server = guild[str(interaction.guild.id)]
+        if sfw_channel:
+            if "quotes" not in server:
+               server["quotes"]={}
+            server["quotes"]["sfw"] = sfw_channel.id
+        if nsfw_channel:
+            if "quotes" not in server:
+                server["quotes"]={}
+            server["quotes"]["nsfw"] = nsfw_channel.id
+        if birthday_channel:
+            if "birthday" not in server:
+                server["birthday"]={}
+            server["birthday"]["channel"] = birthday_channel.id
+            
         with open("guild.json", "w") as p:
             json.dump(guild, p,indent=6)
-
-        embed = discord.Embed(title="Server Configuration", color=guild[str(interaction.guild.id)]["color"])
+            
+        """embed = discord.Embed(title="Server Configuration", color=guild[str(interaction.guild.id)]["color"])
         embed.set_author(name="yusei", icon_url="https://cdn.discordapp.com/avatars/974218172054007809/935d0b2037631baaa14b434f65f4cde2.webp")
-        embed.add_field(name="__**Sfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['sfw']}>" if guild[str(interaction.guild.id)]['sfw'] else "Not set")
-        embed.add_field(name="__**Nsfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['nsfw']}>" if guild[str(interaction.guild.id)]['nsfw'] else "Not set")
-        embed.add_field(name="__**Birthday Channel**__", value=f"<#{guild[str(interaction.guild.id)]['birthday']}>" if guild[str(interaction.guild.id)]['birthday'] else "Not set")
-        embed.add_field(name="__**Embed Color**__", value=f"#{hex(guild[str(interaction.guild.id)]['color']).lstrip('0x')}", inline=True)
-        await interaction.respond(embed=embed,ephemeral=True)
+        embed.add_field(name="__**Sfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['quotes']['sfw']}>" if guild[str(interaction.guild.id)]['sfw'] else "Not set")
+        embed.add_field(name="__**Nsfw Quotes Channel**__", value=f"<#{guild[str(interaction.guild.id)]['quotes']['nsfw']}>" if guild[str(interaction.guild.id)]['nsfw'] else "Not set")
+        embed.add_field(name="__**Birthday Channel**__", value=f"<#{guild[str(interaction.guild.id)]['birthday']['channel']}>" if guild[str(interaction.guild.id)]['birthday'] else "Not set")
+        embed.add_field(name="__**Embed Color**__", value=f"#{hex(guild[str(interaction.guild.id)]['color']).lstrip('0x')}", inline=True)"""
+        await interaction.respond("Quotes channel succesfully set",ephemeral=True)
 
     @config.command(
         name="color",

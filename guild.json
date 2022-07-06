@@ -1,23 +1,29 @@
 {
-      "697934302088003665": {
-            "name": "skittles server",
-            "sfw": 969122578000142336,
-            "nsfw": null,
-            "birthday": null,
-            "color": 14942490
-      },
-      "959379487718510592": {
-            "name": "Yoru shinaini | Chill Hangout | Games | Anime | Socialize | Memes | Music",
-            "sfw": 973934643038531667,
-            "nsfw": null,
-            "birthday": null,
-            "color": 14942490
-      },
       "736101194300129390": {
             "name": "reapur \u2122's Testbed",
-            "sfw": 932838203826782239,
-            "nsfw": 799520552784101406,
-            "birthday": null,
-            "color": 14942490
+            "color": 14942490,
+            "quotes": {
+                  "sfw": 932838203826782239,
+                  "nsfw": 799520552784101406
+            },
+            "birthday": {
+                  "channel": 736101194300129393,
+                  "message": "Happy birthday {user.mention} from staff of {server}",
+                  "mention": "{user.mention}",
+                  "role": 980816782921187348
+            }
+      },
+      "945376235570221106": {
+            "name": "VA EMPIRE(archived)",
+            "color": 14942490,
+            "quotes": {
+                  "sfw": 946171408172613703,
+                  "nsfw": 945409501509611570
+            },
+            "birthday": {
+                  "channel": 986301970103042100,
+                  "message": "Happy birthday {user.mention} from staff of {server}",
+                  "mention": "<@&945391634533711943>"
+            }
       }
 }

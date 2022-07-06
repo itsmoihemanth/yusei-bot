@@ -130,8 +130,8 @@ async def on_guild_remove(guild):
 async def on_raw_reaction_add(payload):
     message = await bot.get_channel(payload.channel_id).fetch_message(payload.message_id)
     if payload.emoji.name == "⭐" and payload.member.bot!=True:
+        commands.cooldown(1, 5, commands.BucketType.guild)
         if message.content != "" or message.attachments != []: 
-            
             with open("guild.json") as file:
                 guild = json.load(file)
 
@@ -184,12 +184,10 @@ async def on_raw_reaction_add(payload):
             if message.author.display_avatar:   
                 embed.set_thumbnail(url=message.author.display_avatar.url)
             
-            c_id = channel.id if channel else payload.channel_id
-            if payload.channel_id != c_id:
-                await message.reply("Quoted to <#"+str(channel.id)+">")
             
             await channel.send(embed=embed)
-            
+            if payload.channel_id != channel.id:
+                await message.reply("Quoted to <#"+str(payload.channel_id)+">")
             
         else:
             await message.reply(f"I can not add that as a quote yet.")
@@ -208,8 +206,8 @@ async def on_raw_reaction_add(payload):
 
 @bot.event
 async def on_member_join(member):
-    if member.guild.id == 959379487718510592:
+    if member.guild.id == 959379487718510592 and member.bot!=True:
         channel = bot.get_channel(974192528704274432)
-        await channel.send(random.choice([f"{member.mention} just entered the city, say hi!",f"Glad you could make it {member.mention}!!",f"Well, Hello there {member.mention}"])) #,view=PersistentView())
+        await channel.send(random.choice([f"{member.mention} just entered the city, say hi!",f"Glad you could make it {member.mention}!!",f"Well, Hello there {member.mention}",f"Hi {member.mention} welcome to the city, hope you enjoy your stay"])) #,view=PersistentView())
     
 bot.run(config["token"])

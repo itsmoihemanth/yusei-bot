@@ -402,8 +402,10 @@ class Birthday(commands.Cog, name="birthday-slash"):
         with open("guild.json", "w") as p:
             json.dump(guild, p,indent=6)
 
-        if response!="":
-            await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+        if response=="":
+            response="No changes were made"
+        await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+            
 
 def setup(bot):
     bot.add_cog(Birthday(bot))

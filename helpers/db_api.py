@@ -1,9 +1,11 @@
 import uuid
+import json
 import mysql.connector
 
 def connect_to_db():
-    conn = mysql.connector.connect(user='u64799_BX2pfS2SPV', password='QoH4SMHEhS+8@e!qSf^cl=vn', host='212.192.28.120', database='s64799_tester')
-    #conn = mysql.connector.connect(user='u64799_CoAur2VxCy', password='KI39N7.=vQg++lzzlM29Fhs!', host='212.192.28.120', database='s64799_yusei')
+    with open("config.json") as file:
+            config = json.load(file)
+    conn = mysql.connector.connect(user=config["db_info"]["user"], password=config["db_info"]["pass"], host=config["db_info"]["host"], database=config["db_info"]["db"])
     return conn
 
 def create_db_table(query,table=''):

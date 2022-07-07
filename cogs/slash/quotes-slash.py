@@ -143,7 +143,7 @@ class Quotes(commands.Cog, name="quotes-slash"):
     )
     @commands.cooldown(1, 5, commands.BucketType.guild)
     @checks.not_blacklisted()
-    async def bday_config(self, interaction: discord.ApplicationContext,
+    async def quotes_config(self, interaction: discord.ApplicationContext,
                             disable : Option(str,description="Turn disable/enable the quotes commands",choices=["True","False"],required=True),
                             sfw_channel: Option(discord.TextChannel, "Set the sfw quotes channel",required=False),
                             nsfw_channel: Option(discord.TextChannel, "Set the nsfw quotes channel",required=False)):
@@ -183,8 +183,9 @@ class Quotes(commands.Cog, name="quotes-slash"):
             json.dump(guild, p,indent=6)
 
         
-        if response!="":
-            await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+        if response=="":
+            response="No changes were made"
+        await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
 
 def setup(bot):
     bot.add_cog(Quotes(bot))

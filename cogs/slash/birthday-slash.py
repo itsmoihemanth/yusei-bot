@@ -367,7 +367,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
         server = guild[str(interaction.guild.id)]
 
         response = ""
-        if disable=='False' and (channel or message or role):
+        if disable=='False' and (channel or message or role or mention):
             if "birthday" not in server:
                 server["birthday"]={}
                 server["birthday"]["enabled"] = True
@@ -384,15 +384,15 @@ class Birthday(commands.Cog, name="birthday-slash"):
 
             if message:
                 server["birthday"]["message"] = message
-                response = response + "> **Birthday Message has been set to `{message}`**\n\n"
+                response = response + f"> **Birthday Message has been set to `{message}`**\n\n"
 
             if mention:
                 server["birthday"]["mention"] = mention
-                response = response + "> **mention has been set to `{mention}`**\n\n"
+                response = response + f"> **mention has been set to `{mention}`**\n\n"
 
             if role:
                 server["birthday"]["role"] = role.id
-                response = response + "> **Birthday Role has been set to <@&{role.id}>**\n\n"
+                response = response + f"> **Birthday Role has been set to <@&{role.id}>**\n\n"
 
         elif disable == 'True':
             if "birthday" in server:
@@ -402,8 +402,10 @@ class Birthday(commands.Cog, name="birthday-slash"):
         with open("guild.json", "w") as p:
             json.dump(guild, p,indent=6)
 
-        if response!="":
-            await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+        if response=="":
+            response="No changes were made"
+        await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+            
 
 def setup(bot):
     bot.add_cog(Birthday(bot))

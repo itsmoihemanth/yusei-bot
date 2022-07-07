@@ -10,45 +10,6 @@ class Owner(commands.Cog, name="owner-slash"):
     def __init__(self, bot):
         self.bot = bot
     
-    echo = SlashCommandGroup("echo", "Send custom msgs")
-
-    @echo.command(
-        name="embed",
-        description="sends an embed",
-        guild=["736101194300129390,976119050071605288"]
-        )
-    @checks.is_owner()
-    async def embed(self, interaction: discord.ApplicationContext,
-                    description : Option(str, "The desc of the embed",required=True),
-                    title : Option(str, "The title of the embed",default=None),
-                    color : Option(str, "The color of the embed",default="FF0000")):
-
-
-        color = color.strip()
-        color = color.lstrip('#')
-        color = int(color,16)
-        
-        embed = discord.Embed(
-                title=title,
-                description=description,
-                color=color
-            )
-        await interaction.send(embed=embed)
-        await interaction.respond("Embed Sent",ephemeral=True)
-
-    @echo.command(
-        name="message",
-        description="Sends a message as the bot",
-        guild=["736101194300129390,976119050071605288"]
-        )
-    @checks.is_owner()
-    async def message(self, interaction: discord.ApplicationContext,
-                    message : Option(str, "Text to send")):
-        
-        await interaction.send(message)
-        
-        await interaction.respond("Message Sent",ephemeral=True)
-
     blacklist = SlashCommandGroup("blacklist", "Get the list of all blacklisted users.")
 
     @blacklist.command(

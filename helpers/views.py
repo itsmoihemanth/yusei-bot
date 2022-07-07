@@ -1,4 +1,4 @@
-import discord
+﻿import discord
 
 class Confirm_View(discord.ui.View):
     def __init__(self):
@@ -11,7 +11,7 @@ class Confirm_View(discord.ui.View):
         self.value = True
         self.stop()
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.grey)
+    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.red)
     async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         await interaction.response.send_message("Cancelling", ephemeral=True)
         self.value = False
@@ -22,16 +22,17 @@ class Modules_View(discord.ui.View):
         super().__init__()
         self.value = None
 
-    @discord.ui.button(label="Birthday", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Birthday", style=discord.ButtonStyle.blurple)
     async def birthday_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message("setting up birthday module", ephemeral=True)
-        self.value = "birthday"
+        view = Channels_View()
+        await interaction.response.send_message("Would you like to create a new channel or select an existing channel", view=view)
+        await view.wait()
+        if view.value == True:
+            print("done")
         self.stop()
 
-    @discord.ui.button(label="Quotes", style=discord.ButtonStyle.green)
+    @discord.ui.button(label="Quotes", style=discord.ButtonStyle.blurple)
     async def quotes_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message("setting up quotes module", ephemeral=True)
-        self.value = "quotes"
         self.stop()
 
 class Channels_View(discord.ui.View):
@@ -39,21 +40,25 @@ class Channels_View(discord.ui.View):
         super().__init__()
         self.value = None
 
-    @discord.ui.button(label="Create New", style=discord.ButtonStyle.green) 
-    async def confirm_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message("Creating new channel")
-        self.value = "new"
+    @discord.ui.button(emoji=discord.PartialEmoji(name="🔨"), style=discord.ButtonStyle.blurple) 
+    async def new_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message("New Channel created",view=Confirm_View())
         self.stop()
 
-    @discord.ui.button(label="Select Existing", style=discord.ButtonStyle.grey)
-    async def confirm_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        self.value = "existing"
+    @discord.ui.button(emoji=discord.PartialEmoji(name="🖱"), style=discord.ButtonStyle.blurple)
+    async def existing_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
         self.stop()
 
-    @discord.ui.button(label="Cancel", style=discord.ButtonStyle.grey)
-    async def confirm_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message("Cancelling", ephemeral=True)
-        self.value = False
+    @discord.ui.button(emoji=discord.PartialEmoji(name="❌"), style=discord.ButtonStyle.blurple)
+    async def cancel_callback(self, button: discord.ui.Button, interaction: discord.Interaction):
+        view=Confirm_View()
+        await interaction.response.send_message("",view=view)
+
+        await view.wait()
+        if view.value == False:
+            print("Continue")
+
+        self.value = True
         self.stop()
 
 
@@ -181,4 +186,4 @@ class TicTacToe(discord.ui.View):
 
         return None
 
-#Tic Tac Toe Views End
+#Tic Tac Toe Views End 

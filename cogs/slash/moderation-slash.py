@@ -195,7 +195,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
     @commands.has_permissions(ban_members=True)
     @checks.not_blacklisted()
     async def hackban(self, interaction: discord.ApplicationContext, user_id: Option(discord.User,"The ID of the user that should be banned."),
-                  reason: Option(str, "The reason you banned the user.",default = "Not specified")) -> None:
+                  reason: Option(str, "The reason you banned the user.",default = "Not specified")):
         """
         Bans a user without the user having to be in the server.
         :param interaction: The application command interaction.
@@ -203,8 +203,8 @@ class Moderation(commands.Cog, name="moderation-slash"):
         :param reason: The reason for the ban. Default is "Not specified".
         """
         try:
-            await self.bot.http.ban(user_id, interaction.guild.id, reason=reason)
-            user = await self.bot.get_or_fetch_user(int(user_id))
+            await self.bot.http.ban(user_id.id, interaction.guild.id, reason=reason)
+            user = await self.bot.get_or_fetch_user(int(user_id.id))
             embed = discord.Embed(
                 title="User Banned!",
                 description=f"**{user} (ID: {user_id}) ** was banned by **{interaction.author}**!",
@@ -224,6 +224,10 @@ class Moderation(commands.Cog, name="moderation-slash"):
             await interaction.respond(embed=embed)
             print(e)
 
+        #def check(m):
+         #   m.author.id == user.id
+
+        #purged_messages = await interaction.channel.purge(check=check)
+
 def setup(bot):
     bot.add_cog(Moderation(bot))
-     

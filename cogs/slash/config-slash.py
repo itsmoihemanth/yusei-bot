@@ -15,19 +15,30 @@ class Config(commands.Cog, name="config-slash"):
     )
     @checks.not_blacklisted()
     async def setup(self, interaction: discord.ApplicationContext):
-        view = views.Modules_View()
-        await interaction.respond("Which module would you like to setup first?",view=view)
+        view1 = views.Modules_View()
+        view2 = views.Channels_View()
+        await interaction.respond("Which module would you like to setup first?",view=view1)
 
-        await view.wait()
-        if view.value is None:
-            print("Timed out...")
-        elif view.value == "birthday":
-            print("birthday module")
-        elif view.value == "quotes":
-            print("quotes module")
+        '''await view1.wait()
+        if view1.value is None:
+            await interaction.send("You took too long to respond")
+            return
+        elif view1.value == "birthday":
+             await interaction.send("Would you like to create a new channel or select an existing channel",view=view2)
+        elif view1.value == "quotes":
+            await interaction.send("Would you like to create a new channel or select an existing channel",view=view2)
 
-        await interaction.respond(view.value)
-        
+        await view2.wait()
+        if view2.value is None:
+            await interaction.respond("You took too long to respond")
+            return
+        elif view2.value == "new":
+            await interaction.send("New Channel created")
+        elif view2.value == "existing":
+            await interaction.send("type which channel you want")
+        elif view2.value == False:
+            await interaction.send("Setup cancelled")'''
+
     config = SlashCommandGroup("config", "config related commands")
 
     @config.command(
@@ -40,10 +51,14 @@ class Config(commands.Cog, name="config-slash"):
     async def config_color(self, interaction: discord.ApplicationContext, 
                             color_hex: Option(str, "The Hex color for embeds to use", required = True)):
          
-        color = color_hex.strip()
-        color = color.lstrip('#')
-        color = int(color,16)
-        
+        try:
+            color = color_hex.strip()
+            color = color.lstrip('#')
+            color = int(color,16)
+        except:
+            await interaction.respond(f"Enter a valid color",ephemeral=True)
+            return
+
         with open("guild.json") as file:
             guild = json.load(file)
 

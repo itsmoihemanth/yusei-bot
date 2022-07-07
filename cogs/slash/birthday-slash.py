@@ -408,4 +408,4 @@ class Birthday(commands.Cog, name="birthday-slash"):
             
 
 def setup(bot):
-    bot.add_cog(Birthday(bot))
+    bot.add_cog(Birthday(bot)) 

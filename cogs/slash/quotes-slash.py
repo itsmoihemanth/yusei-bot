@@ -189,3 +189,4 @@ class Quotes(commands.Cog, name="quotes-slash"):
 
 def setup(bot):
     bot.add_cog(Quotes(bot))
+     

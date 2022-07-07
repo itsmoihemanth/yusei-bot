@@ -226,3 +226,4 @@ class Moderation(commands.Cog, name="moderation-slash"):
 
 def setup(bot):
     bot.add_cog(Moderation(bot))
+     

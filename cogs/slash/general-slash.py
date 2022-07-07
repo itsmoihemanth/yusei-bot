@@ -174,3 +174,4 @@ class General(commands.Cog, name="general-slash"):
 
 def setup(bot):
     bot.add_cog(General(bot))
+     

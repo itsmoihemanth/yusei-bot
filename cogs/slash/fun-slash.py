@@ -86,4 +86,4 @@ class Fun(commands.Cog, name="fun-slash"):
         await interaction.respond("Message Sent",ephemeral=True)
 
 def setup(bot):
-    bot.add_cog(Fun(bot))
+    bot.add_cog(Fun(bot)) 

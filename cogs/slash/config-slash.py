@@ -1,5 +1,4 @@
-﻿import discord
-import json
+﻿import discord, json
 from discord.ext import pages
 from discord.ext import commands
 from discord.commands import Option, SlashCommandGroup
@@ -68,6 +67,121 @@ class Config(commands.Cog, name="config-slash"):
             json.dump(guild, p,indent=6)
 
         await interaction.respond(f"The Color for embeds has been set to {color_hex}",ephemeral=True)
+
+    @config.command(
+    name="quotes",
+    description="config quotes module"
+    )
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @checks.not_blacklisted()
+    async def config_quotes(self, interaction: discord.ApplicationContext,
+                            disable : Option(str,description="Turn disable/enable the quotes commands",choices=["True","False"],required=False),
+                            sfw_channel: Option(discord.TextChannel, "Set the sfw quotes channel",required=False),
+                            nsfw_channel: Option(discord.TextChannel, "Set the nsfw quotes channel",required=False)):
+
+        with open("guild.json") as file:
+            guild = json.load(file)
+            
+        server = guild[str(interaction.guild.id)]
+        
+        response = ""
+        if (disable and disable=='False') or server["quotes"]["enabled"] == True and (sfw_channel or nsfw_channel):
+            if "quotes" not in server:
+                server["quotes"]={}
+                server["quotes"]["enabled"] = True
+                
+                response = response + "> **quotes commands have been enabled**\n\n"
+                
+            if server["quotes"]["enabled"] == False:
+                server["quotes"]["enabled"] = True
+                response = response + "> **quotes commands have been re-enabled**\n\n"
+
+            if sfw_channel:
+                server["quotes"]["channel"] = sfw_channel.id
+                response = response + f"> **quotes Channel has been set to <#{sfw_channel.id}>**\n\n"
+
+            if nsfw_channel:
+                server["quotes"]["channel"] = nsfw_channel.id
+                response = response + f"> **quotes Channel has been set to <#{nsfw_channel.id}>**\n\n"
+                
+        elif disable and disable == 'True':
+            if "quotes" in server:
+                server["quotes"]["enabled"] = False
+                response = response + "> **quotes commands have been disabled**\n\n"
+        
+        elif server["quotes"]["enabled"] == False:
+            response = "> **Quotes Module is disabled, re-enable it first to make changes to config**"
+
+        with open("guild.json", "w") as p:
+            json.dump(guild, p,indent=6)
+
+        if response=="":
+            response="> **No changes were made to config**"
+        await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+
+
+    @config.command(
+    name="birthday",
+    description="config birthday module"
+    )
+    @commands.cooldown(1, 5, commands.BucketType.guild)
+    @checks.not_blacklisted()
+    async def config_bday(self, interaction: discord.ApplicationContext,
+                            disable : Option(str,description="Turn disable/enable the birthday commands",choices=["True","False"],required=False),
+                            channel: Option(discord.TextChannel, "Set the birthday channel",required=False),
+                            message: Option(str, "Set the birthday message. {user},{user.mention},{server}",required=False),
+                            mention: Option(str, "Set the role to ping. {user.mention} or @role",required=False),
+                            role: Option(discord.Role, "Set the role to assign to birthday user.",required=False)):
+
+        with open("guild.json") as file:
+            guild = json.load(file)
+            
+        server = guild[str(interaction.guild.id)]
+
+        response = ""
+        if (disable and disable=='False') or server["birthday"]["enabled"] == True and (channel or message or role or mention):
+            if (disable and disable=='False'):
+                if "birthday" not in server:
+                    server["birthday"]={}
+                    server["birthday"]["enabled"] = True
+                
+                    response = response + "> **Birthday commands have been enabled**\n\n"
+                
+                if server["birthday"]["enabled"] == False:
+                    server["birthday"]["enabled"] = True
+                    response = response + "> **Birthday commands have been re-enabled**\n\n"
+
+                if channel:
+                    server["birthday"]["channel"] = channel.id
+                    response = response + f"> **Birthday Channel has been set to <#{channel.id}>**\n\n"
+
+                if message:
+                    server["birthday"]["message"] = message
+                    response = response + f"> **Birthday Message has been set to `{message}`**\n\n"
+
+                if mention:
+                    server["birthday"]["mention"] = mention
+                    response = response + f"> **mention has been set to `{mention}`**\n\n"
+
+                if role:
+                    server["birthday"]["role"] = role.id
+                    response = response + f"> **Birthday Role has been set to <@&{role.id}>**\n\n"
+
+        if disable and disable == 'True':
+            if "birthday" in server:
+                server["birthday"]["enabled"] = False
+                response = response + "> **Birthday commands have been disabled**\n\n"
+
+        if server["birthday"]["enabled"] == False:
+            response = "> **birthday Module is disabled, re-enable it first to make changes to config**"
+
+        with open("guild.json", "w") as p:
+            json.dump(guild, p,indent=6)
+
+        if response=="":
+            response="No changes were made"
+        await interaction.respond(embed=discord.Embed(description=response, color=guild[str(interaction.guild.id)]["color"]))
+
 
 def setup(bot):
     bot.add_cog(Config(bot))

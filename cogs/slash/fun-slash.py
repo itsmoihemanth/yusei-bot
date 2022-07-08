@@ -3,7 +3,7 @@ import discord
 from discord.ext import commands
 from discord.commands import Option, SlashCommandGroup
 
-from helpers import checks, views
+from helpers import checks, views, json_manager
 
 class Fun(commands.Cog, name="fun-slash"):
     def __init__(self, bot):
@@ -25,13 +25,13 @@ class Fun(commands.Cog, name="fun-slash"):
                     data = await request.json()
                     embed = discord.Embed(
                         description=data["text"],
-                        color=14942490
+                        color=json_manager.get_color(str(interaction.guild.id))
                     )
                 else:
                     embed = discord.Embed(
                         title="Error!",
                         description="There is something wrong with the API, please try again later",
-                        color=14942490
+                        color=json_manager.get_color(str(interaction.guild.id))
                     )
                 await interaction.respond(embed=embed)
 
@@ -55,15 +55,19 @@ class Fun(commands.Cog, name="fun-slash"):
     async def send_embed(self, interaction: discord.ApplicationContext,
                     description : Option(str, "The desc of the embed",required=True),
                     title : Option(str, "The title of the embed",default=None),
-                    color : Option(str, "The color of the embed in hex",default="FF0000")):
+                    color : Option(str, "The color of the embed in hex",default=None)):
 
-        try:
-            color = color.strip()
-            color = color.lstrip('#')
-            color = int(color,16)
-        except Exception as e:
-            await interaction.respond("Enter a valid hex color",ephemeral=True)
-            return
+        if not color:
+            color = json_manager.get_color(str(interaction.guild.id))
+        
+        else:
+            try:
+                color = color.strip()
+                color = color.lstrip('#')
+                color = int(color,16)
+            except:
+                await interaction.respond("Enter a valid hex color",ephemeral=True)
+                return
 
         embed = discord.Embed(
                 title=title,

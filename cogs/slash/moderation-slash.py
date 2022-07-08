@@ -2,7 +2,7 @@ import discord
 from discord import Option
 from discord.ext import commands
 
-from helpers import checks
+from helpers import checks, json_manager
 
 class Moderation(commands.Cog, name="moderation-slash"):
     def __init__(self, bot):
@@ -27,7 +27,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             embed = discord.Embed(
                 title="Error!",
                 description="User has Admin permissions.",
-                color=0xE02B2B
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
         else:
@@ -54,7 +54,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                 embed = discord.Embed(
                     title="Error!",
                     description="An error occurred while trying to kick the user. Make sure my role is above the role of the user you want to kick.",
-                    color=0xE02B2B
+                    color=json_manager.get_color(str(interaction.guild.id))
                 )
                 await interaction.respond(embed=embed)
 
@@ -84,7 +84,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             embed = discord.Embed(
                 title="Error!",
                 description="An error occurred while trying to change the nickname of the user. Make sure my role is above the role of the user you want to change the nickname.",
-                color=0xE02B2B
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
 
@@ -108,7 +108,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                 embed = discord.Embed(
                     title="Error!",
                     description="User has Admin permissions.",
-                    color=0xE02B2B
+                    color=json_manager.get_color(str(interaction.guild.id))
                 )
                 await interaction.respond(embed=embed)
             else:
@@ -132,7 +132,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             embed = discord.Embed(
                 title="Error!",
                 description="An error occurred while trying to ban the user. Make sure my role is above the role of the user you want to ban.",
-                color=0xE02B2B
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
 
@@ -219,7 +219,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             embed = discord.Embed(
                 title="Error!",
                 description="An error occurred while trying to ban the user. Make sure ID is an existing ID that belongs to a user.",
-                color=0xE02B2B
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
             print(e)

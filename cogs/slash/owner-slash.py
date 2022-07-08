@@ -1,9 +1,7 @@
-from pickle import TRUE
-import discord
+import discord, json
 from discord.commands import SlashCommandGroup
 from discord import Option
 from discord.ext import commands
-import json
 from helpers import json_manager, checks, converters
 
 class Owner(commands.Cog, name="owner-slash"):
@@ -40,14 +38,14 @@ class Owner(commands.Cog, name="owner-slash"):
                 embed = discord.Embed(
                     title="Error!",
                     description=f"**{Object.name}** is already in the blacklist.",
-                    color=0xE02B2B
+                    color=json_manager.get_color(str(interaction.guild.id))
                 )
                 return await interaction.respond(embed=embed)
             json_manager.add_to_blacklist(interaction.guild.id,json_key,object_id)
             embed = discord.Embed(
                 title="User Blacklisted",
                 description=f"**{Object.name}** has been successfully added to the blacklist",
-                color=0x9C84EF
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             with open("blacklist.json") as file:
                 blacklist = json.load(file)
@@ -59,7 +57,7 @@ class Owner(commands.Cog, name="owner-slash"):
             embed = discord.Embed(
                 title="Error!",
                 description=f"An **{exception}** occurred when trying to add **{Object.name}** to the blacklist.",
-                color=0xE02B2B
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
 
@@ -89,14 +87,14 @@ class Owner(commands.Cog, name="owner-slash"):
                 embed = discord.Embed(
                     title="Error!",
                     description=f"**{Object.name}** is not in the blacklist.",
-                    color=0xE02B2B
+                    color=json_manager.get_color(str(interaction.guild.id))
                 )
                 return await interaction.respond(embed=embed)
             json_manager.remove_from_blacklist(interaction.guild.id,json_key,object_id)
             embed = discord.Embed(
                 title="User removed from blacklist",
                 description=f"**{Object.name}** has been successfully removed from the blacklist",
-                color=0x9C84EF
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             with open("blacklist.json") as file:
                 blacklist = json.load(file)
@@ -108,7 +106,7 @@ class Owner(commands.Cog, name="owner-slash"):
             embed = discord.Embed(
                 title="Error!",
                 description=f"An **{exception}** occurred when trying to add **{Object.name}** to the blacklist.",
-                color=0xE02B2B
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
 

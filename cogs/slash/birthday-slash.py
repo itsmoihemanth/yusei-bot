@@ -3,7 +3,7 @@ import discord
 import json, datetime, asyncio
 from discord.ext import pages, commands, tasks
 from discord.commands import Option, SlashCommandGroup
-from helpers import checks, db_api
+from helpers import checks, db_api, json_manager
 
 def suffix_helper(val):
     if val in [1, 21, 31, 41, 51, 61, 71]:
@@ -104,9 +104,6 @@ class Birthday(commands.Cog, name="birthday-slash"):
         month_name: Option(str, name="month", description="Enter your birthday",choices=['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'],required=True)):
 
         suffix = suffix_helper(day)
-        
-        with open("guild.json") as file:
-            guild = json.load(file)
             
         member = interaction.user
 
@@ -150,7 +147,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
         
         make_embed = discord.Embed(title=member.display_name,
                                     description=response,
-                                    color=guild[str(interaction.guild.id)]["color"])
+                                    color=json_manager.get_color(str(interaction.guild.id)))
         if member.display_avatar:
             make_embed.set_thumbnail(url=member.display_avatar.url)
         await interaction.respond(embed=make_embed)
@@ -206,7 +203,7 @@ class Birthday(commands.Cog, name="birthday-slash"):
                     difference = date_object.date() - DMtoday.date()
 
                 make_embed = discord.Embed(title=f"{name}",description=f"<@{user_id}>'s birthday is on **{day}{suffix} {dat}** in **{difference.days}** days",
-                                            color=guild[str(interaction.guild.id)]["color"])
+                                            color=json_manager.get_color(str(interaction.guild.id)))
 
                 if interaction.guild.icon != None:
                     make_embed.set_thumbnail(url=interaction.guild.icon.url)

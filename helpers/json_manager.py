@@ -24,3 +24,11 @@ def remove_from_blacklist(guild_id: int,json_key: str,object_id: int) -> None:
     with open("blacklist.json", "w") as file:
         file.seek(0)
         json.dump(file_data, file, indent=4)
+
+def get_color(guild_id):
+        with open("guild.json") as file:
+            guild = json.load(file)
+
+        color=guild[str(guild_id)]["color"]
+
+        return color

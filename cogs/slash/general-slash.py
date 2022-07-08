@@ -1,9 +1,7 @@
-import discord
+import discord, json, platform
 from discord import Option
 from discord.ext import commands
-import platform
-from helpers import checks
-import json
+from helpers import checks, json_manager
 
 with open("config.json") as file:
     config = json.load(file)
@@ -68,7 +66,7 @@ class General(commands.Cog, name="general-slash"):
         embed = discord.Embed(
             title="**Server Name:**",
             description=f"{interaction.guild}",
-            color=0x9C84EF
+            color=json_manager.get_color(str(interaction.guild.id))
         )
         embed.set_thumbnail(
             url=interaction.guild.icon.url if interaction.guild.icon else ""
@@ -107,7 +105,7 @@ class General(commands.Cog, name="general-slash"):
         embed = discord.Embed(
             title="🏓 Pong!",
             description=f"The bot latency is {round(self.bot.latency * 1000)}ms.",
-            color=0x9C84EF
+            color=json_manager.get_color(str(interaction.guild.id))
         )
         await interaction.respond(embed=embed)
 

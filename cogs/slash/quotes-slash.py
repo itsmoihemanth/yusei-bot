@@ -6,7 +6,7 @@ from discord.commands import Option, SlashCommandGroup
 from helpers import checks, db_api
 
 class Quotes(commands.Cog, name="quotes-slash"): 
-    def __init__(self, bot):
+    def __init__(self, bot): 
         self.bot = bot
     
     quotes = SlashCommandGroup("quotes", "Quotes related commands")

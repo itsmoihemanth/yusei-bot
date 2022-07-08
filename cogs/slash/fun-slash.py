@@ -57,7 +57,7 @@ class Fun(commands.Cog, name="fun-slash"):
                     title : Option(str, "The title of the embed",default=None),
                     color : Option(str, "The color of the embed in hex",default=None)):
 
-        if not color:
+        if not color: 
             color = json_manager.get_color(str(interaction.guild.id))
         
         else:

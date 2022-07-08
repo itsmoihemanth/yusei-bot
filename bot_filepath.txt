@@ -1,0 +1,70 @@
+Fun commands
+	/8ball - ask any question to the bot
+		-question:[str]
+		
+	/randomfact - get a random fact
+	
+Quotes commands
+	> react with :star: to add quote i.e starboard
+	/quotes add
+		-quote:[str]
+		-user:[@user]
+		
+	/quotes view
+		-user:[@user] - users quotes to filter(optional)
+	
+	/quotes delete(admin)
+		-id:[str] - id of quote to delete
+	
+	/quotes edit(admin)
+		-id:[str] - id of quote to edit
+	
+	/quotes setup - setup sfw, nsfw channel
+	
+	
+Birthday Commands
+	/bday set - set birthday
+		-day:[int] min=1,max=31
+		-month:choice=[january,.......,december]
+		-user:[@User] - set others bday (user needs to confirm before adding)(optional)
+		
+	/bday remove - remove your own birthday
+
+	/bday view - view your own birthday
+		-user:[@User] - view others birthday(optional)
+	
+	/bday list - list of all user birthdays in the server
+	
+	/bday upcoming - view next 5 birthdays
+	
+	/bday setup - setup birthday channel, role, message
+			
+Server Configuration (Administrators-only)
+	/config - config bot settings
+		-module: choices=[bday,quotes]
+		-channel:[#channel] - config module channel(optional)
+		-role:[@role] - config role to use (bday command only)(optional)
+		-color:[#hex] - config color to use for embed(optional)
+		-setting: choices=[enable,disable]
+		
+	/settings - view all server settings - use dropdown + buttons for switching between modules and pages
+
+Misc commands
+	/bug_report - report bugs in the bot
+		description:[str]
+			
+**__Under consideration__**
+auto - moderation commands using oterlu bot api
+	/setup
+	
+	/config
+
+Form commands
+	/form answer
+	/form view
+	/form create(admin)
+
+
+
+To do
+redo blacklist commands

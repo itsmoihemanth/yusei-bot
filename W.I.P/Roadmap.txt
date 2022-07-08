@@ -1,0 +1,10 @@
+To add
+	-Levels
+	-Economy based on xp and levels
+	-Survey add?
+	
+To edit/fix
+	-Redo surveyor
+	-better db storage for quotes, birthdays and surveys
+	-Birthday bot wishing
+	

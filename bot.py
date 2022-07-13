@@ -228,6 +228,7 @@ async def reload(ctx, cog: str):
 
 @bot.command()
 async def announce(ctx, *, message: str):
+
     if ctx.message.author.id in config["owners"]:
         for guild in bot.guilds:
             print(bot.guilds)

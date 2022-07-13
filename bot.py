@@ -7,7 +7,6 @@ import discord
 from discord.ext import commands
 from discord.ext.commands import Bot
 from helpers import db_api
-import datetime
 import logging
 
 logger = logging.getLogger('discord')
@@ -30,8 +29,7 @@ async def on_ready() -> None:
     """
     The code in this even is executed when the bot is ready
     """
-    
-    today = datetime.datetime.now()
+    today = discord.utils.utcnow()
     print(f"Logged in as {bot.user.name} at {today}")
     print(f"discord API version: {discord.__version__}")
     print(f"Python version: {platform.python_version()}")
@@ -228,6 +226,7 @@ async def reload(ctx, cog: str):
 
 @bot.command()
 async def announce(ctx, *, message: str):
+
     if ctx.message.author.id in config["owners"]:
         for guild in bot.guilds:
             print(bot.guilds)

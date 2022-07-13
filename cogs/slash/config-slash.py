@@ -1,5 +1,4 @@
 ﻿import discord, json
-from discord.ext import pages
 from discord.ext import commands
 from discord.commands import Option, SlashCommandGroup
 from helpers import checks, views

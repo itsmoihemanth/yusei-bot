@@ -8,7 +8,7 @@ from helpers import checks, views, json_manager
 class Fun(commands.Cog, name="fun-slash"):
     def __init__(self, bot):
         self.bot = bot
-   
+    
     @commands.slash_command( 
         name="randomfact",
         description="Get a random fact."
@@ -40,11 +40,37 @@ class Fun(commands.Cog, name="fun-slash"):
         description="tic tac toe."
     )
     @checks.not_blacklisted()
-    async def tic(self, ctx: discord.ApplicationContext):
-        """Starts a tic-tac-toe game with yourself."""
+    async def tic(self, interaction: discord.ApplicationContext):
+        """
+        Starts a tic-tac-toe game with yourself
+        :param interaction: The application command interaction.
+        """
+        
         # Setting the reference message to ctx.message makes the bot reply to the member's message.
-        await ctx.respond("Tic Tac Toe: X goes first", view=views.TicTacToe())
+        await interaction.respond("Tic Tac Toe: X goes first", view=views.TicTacToe())
 
+    @commands.slash_command( 
+        name="avatar",
+        description="Gives you the a users avatar/pfp"
+        )
+    @checks.not_blacklisted()
+    async def avatar(self, interaction: discord.ApplicationContext, 
+                     member: Option(discord.Member, "Member whose avatar/pfp you want", default = None)):
+        """
+        Gives you the a users avatar/pfp
+        :param interaction: The application command interaction.
+        :param member: The member whose avatar/pfp you want
+        """
+        
+        if not member:
+            member= interaction.user
+
+        embed = discord.Embed(title=str(member), color=json_manager.get_color(str(interaction.guild.id)))
+        embed.set_image(url=member.avatar.url)
+
+        await interaction.respond(embed=embed)
+        
+                        
     send = SlashCommandGroup("send", "Send custom msgs")
 
     @send.command(
@@ -76,7 +102,7 @@ class Fun(commands.Cog, name="fun-slash"):
             )
         await interaction.send(embed=embed)
         await interaction.respond("Embed Sent",ephemeral=True)
-
+        
     @send.command(
         name="message",
         description="Sends a message as the bot"

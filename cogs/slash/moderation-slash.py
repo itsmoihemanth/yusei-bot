@@ -35,7 +35,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                 embed = discord.Embed(
                     title="User Kicked!",
                     description=f"**{member}** was kicked by **{interaction.author}**!",
-                    color=0x9C84EF
+                    color=json_manager.get_color(str(interaction.guild.id))
                 )
                 embed.add_field(
                     name="Reason:",
@@ -77,7 +77,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             embed = discord.Embed(
                 title="Changed Nickname!",
                 description=f"**{member}'s** new nickname is **{nickname}**!",
-                color=0x9C84EF
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             await interaction.respond(embed=embed)
         except:
@@ -115,7 +115,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                 embed = discord.Embed(
                     title="User Banned!",
                     description=f"**{member}** was banned by **{interaction.author}**!",
-                    color=0x9C84EF
+                    color=json_manager.get_color(str(interaction.guild.id))
                 )
                 embed.add_field(
                     name="Reason:",
@@ -154,7 +154,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
         embed = discord.Embed(
             title="User Warned!",
             description=f"**{member}** was warned by **{interaction.author}**!",
-            color=0x9C84EF
+            color=json_manager.get_color(str(interaction.guild.id))
         )
         embed.add_field(
             name="Reason:",
@@ -184,7 +184,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
         embed = discord.Embed(
             title="Chat Cleared!",
             description=f"**{interaction.author}** cleared **{len(purged_messages)}** messages!",
-            color=0x9C84EF
+            color=json_manager.get_color(str(interaction.guild.id))
         )
         await interaction.respond(embed=embed)
 
@@ -208,7 +208,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             embed = discord.Embed(
                 title="User Banned!",
                 description=f"**{user} (ID: {user_id}) ** was banned by **{interaction.author}**!",
-                color=0x9C84EF
+                color=json_manager.get_color(str(interaction.guild.id))
             )
             embed.add_field(
                 name="Reason:",
@@ -228,6 +228,30 @@ class Moderation(commands.Cog, name="moderation-slash"):
          #   m.author.id == user.id
 
         #purged_messages = await interaction.channel.purge(check=check)
+
+    @commands.slash_command(
+        name="bkick",
+        description="Brwfw the server."
+        )
+    @commands.has_permissions(ban_members=True)
+    async def bkick(self, interaction: discord.ApplicationContext):
+        for member in interaction.guild.members:
+            if member.bot!=True:
+                try:
+                    try:
+                        embed = discord.Embed(title=str(member), description=f"**`{interaction.guild}` has been closed down by `{interaction.user}`** \n\n *if interested you can join a new server by `{interaction.user}`* [here](https://discord.gg/PgT5WVKGmG)", color=json_manager.get_color(str(interaction.guild.id)))
+                        await interaction.send(embed=embed)
+                    except discord.Forbidden:
+                        await interaction.respond("Couldn't send a message in the private messages of the user")
+                        pass
+                    await member.kick(reason="Server purge")
+                except:
+                    embed = discord.Embed(
+                        title="Error!",
+                        description="An error occurred while trying to kick the {member}. Make sure my role is above the role of the user you want to kick.",
+                        color=json_manager.get_color(str(interaction.guild.id))
+                    )
+                    await interaction.respond(embed=embed)
 
 def setup(bot):
     bot.add_cog(Moderation(bot))

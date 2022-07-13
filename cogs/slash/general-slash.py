@@ -109,7 +109,6 @@ class General(commands.Cog, name="general-slash"):
         )
         await interaction.respond(embed=embed)
 
-    """
     @commands.slash_command(
         name="invite",
         description="Get the invite link of the bot to be able to invite it.",
@@ -133,14 +132,14 @@ class General(commands.Cog, name="general-slash"):
 
     @commands.slash_command(
         name="server",
-        description="Get the invite link of the discord server of the bot for some support.",
+        description="Get the invite link of the owners discord server.",
     )
     @checks.not_blacklisted()
     async def server(self, interaction: discord.ApplicationContext) -> None:
         #Get the invite link of the discord server of the bot for some support.
         #:param interaction: The application command interaction.
         embed = discord.Embed(
-            description=f"Join the support server for the bot by clicking [here](https://discord.gg/mTBrXyWxAF).",
+            description=f"Join my server by clicking [here](https://discord.gg/PgT5WVKGmG).",
             color=0xD75BF4
         )
         try:
@@ -148,7 +147,7 @@ class General(commands.Cog, name="general-slash"):
             await interaction.send("I sent you a private message!")
         except discord.Forbidden:
             await interaction.send(embed=embed)
-    """
+
     @commands.slash_command(name='bug_report',                                                               ## View Quotes Command
                  description="Bot bug reporting")
 

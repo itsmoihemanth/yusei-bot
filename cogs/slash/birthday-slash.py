@@ -1,6 +1,5 @@
-from random import choices
 import discord
-import json, datetime, asyncio
+import json, datetime
 from discord.ext import pages, commands, tasks
 from discord.commands import Option, SlashCommandGroup
 from helpers import checks, db_api, json_manager

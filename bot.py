@@ -45,7 +45,7 @@ def load_commands(command_type: str) -> None:
             extension = file[:-3]
             try:
                 bot.load_extension(f"cogs.{command_type}.{extension}")
-                print(f"Loaded extension '{extension}'")
+                print(f"Loaded extension 'cogs.{command_type}.{extension}'")
             except Exception as e:
                 exception = f"{type(e).__name__}: {e}"
                 print(f"Failed to load extension {extension}\n{exception}")
@@ -209,5 +209,36 @@ async def on_member_join(member):
     if member.guild.id == 959379487718510592 and member.bot!=True:
         channel = bot.get_channel(974192528704274432)
         await channel.send(random.choice([f"{member.mention} just entered the city, say hi!",f"Glad you could make it {member.mention}!!",f"Well, Hello there {member.mention}",f"Hi {member.mention} welcome to the city, hope you enjoy your stay"])) #,view=PersistentView())
-    
+
+        
+@bot.command()
+async def reload(ctx, cog: str):
+    """Re-evaluate the cog's code. Useful if working on the cog's code
+    and you want to quickly test your changes. Can only be used by bot
+    admins
+    """
+    if ctx.message.author.id in config["owners"]:
+        try:
+            bot.reload_extension(f"cogs.{cog}")
+            await ctx.message.add_reaction('\U0001F44D')
+        except Exception as error:
+            print(error, file=sys.stderr)
+            await ctx.send(f"```python\n{error}```")
+            
+
+@bot.command()
+async def announce(ctx, *, message: str):
+    if ctx.message.author.id in config["owners"]:
+        for guild in bot.guilds:
+            print(bot.guilds)
+            print(guild)
+            print(guild.owner)
+            print(guild.owner.dm_channel)
+            try:
+                await guild.owner.send(message)
+                await ctx.reply(f"Dm sent to `{guild.owner}` of `{guild}`")
+            except Exception as error:
+                await ctx.reply(f"Dm to `{guild.owner}` of `{guild}` raised an error : ```{error}```")
+
+
 bot.run(config["token"])

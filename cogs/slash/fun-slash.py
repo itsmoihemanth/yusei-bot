@@ -36,7 +36,7 @@ class Fun(commands.Cog, name="fun-slash"):
                 await interaction.respond(embed=embed)
 
     @commands.slash_command( 
-        name="tic",
+        name="tictactoe",
         description="tic tac toe."
     )
     @checks.not_blacklisted()

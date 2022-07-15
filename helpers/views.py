@@ -62,6 +62,17 @@ class Channels_View(discord.ui.View):
         self.stop()
 
 
+class PersistentView(discord.ui.View):
+    def __init__(self):
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Wave To Say Hi!!",
+        custom_id="persistent_view:greet",
+    )
+    async def greet(self, button: discord.ui.Button, interaction: discord.Interaction):
+        await interaction.response.send_message(random.choice(["https://c.tenor.com/-Kgr-uW4GA8AAAAi/hello.gif","https://c.tenor.com/qLMpwF42khIAAAAi/hi-brown.gif","https://c.tenor.com/y1enbfpHMTEAAAAi/hi-cute.gif","https://c.tenor.com/ftqs42Yna-oAAAAi/mochi-mochi-hello-white-mochi-mochi.gif"]))
+
 
 #Tic Tac Toe Views Start
 

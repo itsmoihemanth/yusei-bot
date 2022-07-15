@@ -194,24 +194,12 @@ async def on_raw_reaction_add(payload):
             
         else:
             await message.reply(f"I can not add that as a quote yet.")
-
-"""class PersistentView(discord.ui.View):
-    def __init__(self):
-        super().__init__(timeout=None)
-
-    @discord.ui.button(
-        label="Wave To Say Hi!!",
-        custom_id="persistent_view:greet",
-    )
-    async def greet(self, button: discord.ui.Button, interaction: discord.Interaction):
-        await interaction.response.send_message(random.choice(["https://c.tenor.com/-Kgr-uW4GA8AAAAi/hello.gif","https://c.tenor.com/qLMpwF42khIAAAAi/hi-brown.gif","https://c.tenor.com/y1enbfpHMTEAAAAi/hi-cute.gif","https://c.tenor.com/ftqs42Yna-oAAAAi/mochi-mochi-hello-white-mochi-mochi.gif"]))
-"""
-
+            
 @bot.event
 async def on_member_join(member):
     if member.guild.id == 959379487718510592 and member.bot!=True:
         channel = bot.get_channel(974192528704274432)
-        await channel.send(random.choice([f"{member.mention} just entered the city, say hi!",f"Glad you could make it {member.mention}!!",f"Well, Hello there {member.mention}",f"Hi {member.mention} welcome to the city, hope you enjoy your stay"])) #,view=PersistentView())
+        await channel.send(random.choice([f"{member.mention} just entered the city, say hi!",f"Glad you could make it {member.mention}!!",f"Well, Hello there {member.mention}",f"Hi {member.mention} welcome to the city, hope you enjoy your stay"])) #,view=views.PersistentView())
 
         
 @bot.command()

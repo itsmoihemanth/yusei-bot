@@ -242,7 +242,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                         embed = discord.Embed(title=str(member), description=f"**`{interaction.guild}` has been closed down by `{interaction.user}`** \n\n *if interested you can join a new server by `{interaction.user}`* [here](https://discord.gg/PgT5WVKGmG)", color=json_manager.get_color(str(interaction.guild.id)))
                         await member.send(embed=embed)
                     except discord.Forbidden:
-                        await interaction.respond("Couldn't send a message in the private messages of the user")
+                        await interaction.respond(f"Couldn't send a message in the private messages of {member}")
                         pass
                     await member.kick(reason="Server purge")
                 except:

@@ -240,7 +240,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                 try:
                     try:
                         embed = discord.Embed(title=str(member), description=f"**`{interaction.guild}` has been closed down by `{interaction.user}`** \n\n *if interested you can join a new server by `{interaction.user}`* [here](https://discord.gg/PgT5WVKGmG)", color=json_manager.get_color(str(interaction.guild.id)))
-                        await interaction.send(embed=embed)
+                        await member.send(embed=embed)
                     except discord.Forbidden:
                         await interaction.respond("Couldn't send a message in the private messages of the user")
                         pass
@@ -248,7 +248,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                 except:
                     embed = discord.Embed(
                         title="Error!",
-                        description="An error occurred while trying to kick the {member}. Make sure my role is above the role of the user you want to kick.",
+                        description=f"An error occurred while trying to kick the {member}. Make sure my role is above the role of the user you want to kick.",
                         color=json_manager.get_color(str(interaction.guild.id))
                     )
                     await interaction.respond(embed=embed)

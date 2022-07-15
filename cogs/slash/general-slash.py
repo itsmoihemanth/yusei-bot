@@ -126,9 +126,9 @@ class General(commands.Cog, name="general-slash"):
         try:
             # To know what permissions to give to your bot, please see here: https://discordapi.com/permissions.html and remember to not give Administrator permissions.
             await interaction.author.send(embed=embed)
-            await interaction.send("I sent you a private message!")
+            await interaction.respond("I sent you a private message!")
         except discord.Forbidden:
-            await interaction.send(embed=embed)
+            await interaction.respond(embed=embed)
 
     @commands.slash_command(
         name="server",
@@ -140,23 +140,16 @@ class General(commands.Cog, name="general-slash"):
         #:param interaction: The application command interaction.
         embed = discord.Embed(
             description=f"Join my server by clicking [here](https://discord.gg/PgT5WVKGmG).",
-<<<<<<< HEAD
             color=json_manager.get_color(str(interaction.guild.id))
-=======
-            color=0xD75BF4
->>>>>>> 20910f0 (commands added)
         )
         try:
             await interaction.author.send(embed=embed)
-            await interaction.send("I sent you a private message!")
+            await interaction.respond("I sent you a private message!")
         except discord.Forbidden:
-            await interaction.send(embed=embed)
+            await interaction.respond(embed=embed)
 
-<<<<<<< HEAD
-    @commands.slash_command(name='bug_report',                                                               
-=======
-    @commands.slash_command(name='bug_report',                                                               ## View Quotes Command
->>>>>>> 20910f0 (commands added)
+
+    @commands.slash_command(name='bug_report',                                                         
                  description="Bot bug reporting")
 
     async def bug_report(self, interaction: discord.ApplicationContext, 

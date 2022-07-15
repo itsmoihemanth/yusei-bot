@@ -9,6 +9,11 @@ from discord.ext.commands import Bot
 from helpers import db_api
 import logging
 
+"""
+def git_func():
+    import subprocess
+    subprocess.run(["git", "pull"])
+"""
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
 handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')

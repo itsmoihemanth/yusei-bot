@@ -135,13 +135,13 @@ class Birthday(commands.Cog, name="birthday-slash"):
             today = datetime.datetime.now()
              
             if today.month > month_number or (today.month == month_number and today.day > day):
-                date_object = datetime.datetime.strptime(f"{day}/{month_number}/{today.year+1}", "%d/%m/%y")
-                DMtoday = datetime.datetime.strptime(today.strftime("%d/%m/%y"), "%d/%m/%y")
+                date_object = datetime.datetime.strptime(f"{day}/{month_number}/{today.year+1}", "%d/%m/%Y")
+                DMtoday = datetime.datetime.strptime(today.strftime("%d/%m/%Y"), "%d/%m/%Y")
                 difference = date_object.date() - DMtoday.date()
             else:
                 DMtoday = datetime.datetime.strptime(today.strftime("%d/%m"), "%d/%m")
                 difference = date_object.date() - DMtoday.date()
-            
+
             response = f"Succesfully set your birthday to **{day}{suffix} {month_name}**\n i will wish you in **{difference.days}** days" if int(difference.days)>0 else "Succesfully set your birthday to **{day}{suffix} {month_name}**\n **Have the happiest of birthdays {member.mention}"
         
         make_embed = discord.Embed(title=member.display_name,

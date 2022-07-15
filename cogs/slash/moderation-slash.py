@@ -228,10 +228,10 @@ class Moderation(commands.Cog, name="moderation-slash"):
          #   m.author.id == user.id
 
         #purged_messages = await interaction.channel.purge(check=check)
-
+"""
     @commands.slash_command(
         name="bkick",
-        description="Brwfw the server."
+        description="kick everyone in the server.(can only kick members whose role is belo bots role)"
         )
     @commands.has_permissions(ban_members=True)
     async def bkick(self, interaction: discord.ApplicationContext):
@@ -245,6 +245,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                         await interaction.respond(f"Couldn't send a message in the private messages of {member}")
                         pass
                     await member.kick(reason="Server purge")
+                    await interaction.respond(f"{member} has been kicked")
                 except:
                     embed = discord.Embed(
                         title="Error!",
@@ -252,6 +253,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
                         color=json_manager.get_color(str(interaction.guild.id))
                     )
                     await interaction.respond(embed=embed)
+"""
 
 def setup(bot):
     bot.add_cog(Moderation(bot))

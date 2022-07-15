@@ -22,7 +22,7 @@ class General(commands.Cog, name="general-slash"):
         """
         embed = discord.Embed(
             description="Made by reapur ™",
-            colour=14942490
+            colour=json_manager.get_color(str(interaction.guild.id))
         )
         embed.set_author(
             name="Bot Information"
@@ -121,7 +121,7 @@ class General(commands.Cog, name="general-slash"):
         
         embed = discord.Embed(
             description=f"Invite me by clicking [here](https://discordapp.com/oauth2/authorize?&client_id={config['application_id']}&scope=bot+applications.commands&permissions={config['permissions']}).",
-            color=0xD75BF4
+            color=json_manager.get_color(str(interaction.guild.id))
         )
         try:
             # To know what permissions to give to your bot, please see here: https://discordapi.com/permissions.html and remember to not give Administrator permissions.
@@ -140,7 +140,11 @@ class General(commands.Cog, name="general-slash"):
         #:param interaction: The application command interaction.
         embed = discord.Embed(
             description=f"Join my server by clicking [here](https://discord.gg/PgT5WVKGmG).",
+<<<<<<< HEAD
+            color=json_manager.get_color(str(interaction.guild.id))
+=======
             color=0xD75BF4
+>>>>>>> 20910f0 (commands added)
         )
         try:
             await interaction.author.send(embed=embed)
@@ -148,7 +152,11 @@ class General(commands.Cog, name="general-slash"):
         except discord.Forbidden:
             await interaction.send(embed=embed)
 
+<<<<<<< HEAD
+    @commands.slash_command(name='bug_report',                                                               
+=======
     @commands.slash_command(name='bug_report',                                                               ## View Quotes Command
+>>>>>>> 20910f0 (commands added)
                  description="Bot bug reporting")
 
     async def bug_report(self, interaction: discord.ApplicationContext, 
@@ -159,7 +167,7 @@ class General(commands.Cog, name="general-slash"):
         await interaction.respond(f"Thank you for the report {interaction.author.mention}, we will look into it")
 
 
-    @commands.slash_command(name='suggest',                                                               ## View Quotes Command
+    @commands.slash_command(name='suggest',                                                               
                  description="Suggest a new feature for the bot")
 
     async def suggest(self, interaction: discord.ApplicationContext, 
@@ -168,6 +176,7 @@ class General(commands.Cog, name="general-slash"):
         dm = await self.bot.fetch_user(440433975396401152)
         await dm.send(f"suggestion from {interaction.author.mention} in {interaction.guild}:\n\n {suggestion}")
         await interaction.respond(f"Thank you for the suggestion {interaction.author.mention}")
+
 
 def setup(bot):
     bot.add_cog(General(bot))

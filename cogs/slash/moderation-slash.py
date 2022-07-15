@@ -231,7 +231,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
 
     @commands.slash_command(
         name="bkick",
-        description="Brwfw the server." 
+        description="Brwfw the server."
         )
     @commands.has_permissions(ban_members=True)
     async def bkick(self, interaction: discord.ApplicationContext):

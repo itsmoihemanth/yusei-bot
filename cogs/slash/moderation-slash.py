@@ -186,7 +186,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
             description=f"**{interaction.author}** cleared **{len(purged_messages)}** messages!",
             color=json_manager.get_color(str(interaction.guild.id))
         )
-        await interaction.respond(embed=embed)
+        await interaction.respond(embed=embed,ephemeral=True)
 
     @commands.slash_command(
         name="hackban",

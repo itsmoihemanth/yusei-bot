@@ -80,8 +80,9 @@ async def on_command_error(context, error):
         print(error, type(error))
         await context.send(error)
     elif isinstance(error, commands.CommandNotFound):
-        print(error, type(error))
-        await context.send("That is not a valid command")
+        pass
+        #print(error, type(error))
+        #await context.send("That is not a valid command")
     elif isinstance(error, commands.errors.MissingPermissions):
         await context.send("You do not have permission to use this command")
     else:

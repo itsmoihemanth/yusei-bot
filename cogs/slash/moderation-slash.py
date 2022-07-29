@@ -166,7 +166,7 @@ class Moderation(commands.Cog, name="moderation-slash"):
         except discord.Forbidden:
             # Couldn't send a message in the private messages of the user
             await interaction.respond(f"{member.mention}, you were warned by **{interaction.author}**!\nReason: {reason}")
-
+            
     @commands.slash_command(
         name="purge",
         description="Delete a number of messages."

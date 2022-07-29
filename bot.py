@@ -232,6 +232,6 @@ async def announce(ctx, *, message: str):
                 await ctx.reply(f"Dm sent to `{guild.owner}` of `{guild}`")
             except Exception as error:
                 await ctx.reply(f"Dm to `{guild.owner}` of `{guild}` raised an error : ```{error}```")
-
+                
 
 bot.run(config["token"])

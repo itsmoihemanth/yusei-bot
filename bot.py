@@ -27,7 +27,7 @@ else:
         config = json.load(file)
 
 intents = discord.Intents.all()
-bot = Bot(command_prefix=commands.when_mentioned_or(config["prefix"]), intents=intents)
+bot = Bot(command_prefix=commands.when_mentioned_or(config["prefix"]), intents=intents, help_command=None)
 
 @bot.event
 async def on_ready() -> None:
@@ -56,7 +56,7 @@ def load_commands(command_type: str) -> None:
 
 if __name__ == "__main__":
     load_commands("slash")
-    #load_commands("normal")
+    load_commands("normal")
     #load_commands("listeners")
 
 @bot.event

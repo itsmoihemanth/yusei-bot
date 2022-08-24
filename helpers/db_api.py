@@ -144,7 +144,7 @@ def get_birthdays(data):
     if 'user_id' in data and data['user_id']:
         search = f"WHERE `user_id` = '{data['user_id']}'"
     elif 'date' in data and data['date']:
-        search = f"WHERE `month`>'{data['date']}'"
+        search = f"WHERE `month`>='{data['date']} and `day`>''{data['date']}'"
         limit = f"LIMIT {data['limit']}"
     elif 'day' in data and data['day']:
         search = f"WHERE `month`='{data['month']}' and `day`='{data['day']}'"
